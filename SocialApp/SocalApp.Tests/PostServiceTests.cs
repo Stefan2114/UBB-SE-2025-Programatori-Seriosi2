@@ -6,7 +6,7 @@ using SocialApp.Enums;
 using SocialApp.Entities;
 
 
-namespace SocalApp.Tests
+namespace SocialApp.Tests
 {
     /// <summary>
     /// Contains unit tests for the PostService class.
@@ -54,7 +54,7 @@ namespace SocalApp.Tests
 
             userRepository.Received(1).GetById(userId);
             groupRepository.Received(1).GetById(groupId);
-            postRepository.Received(1).Save(Arg.Any<Post>());
+            postRepository.Received(1).SavePost(Arg.Any<Post>());
         }
 
         /// <summary>
@@ -154,11 +154,11 @@ namespace SocalApp.Tests
 
             long postId = 1;
 
-            postRepository.GetById(postId).Returns((Post)null); // Simulate post not found
+            postRepository.GetPostById(postId).Returns((Post)null); // Simulate post not found
 
             // Act & Assert
             Assert.Throws<Exception>(() => postService.DeletePost(postId), "Post does not exist");
-            postRepository.Received(1).GetById(postId);
+            postRepository.Received(1).GetPostById(postId);
         }
 
         /// <summary>
@@ -178,14 +178,14 @@ namespace SocalApp.Tests
 
             Post post = new Post { Id = postId, Title = "title", Content = "content", UserId = 1, GroupId = 1, Visibility = PostVisibility.Public, Tag = PostTag.Food, CreatedDate = DateTime.Now };
 
-            postRepository.GetById(postId).Returns(post);
+            postRepository.GetPostById(postId).Returns(post);
 
             // Act
             postService.DeletePost(postId);
 
             // Assert
-            postRepository.Received(1).GetById(postId);
-            postRepository.Received(1).DeleteById(postId);
+            postRepository.Received(1).GetPostById(postId);
+            postRepository.Received(1).DeletePostById(postId);
         }
 
         /// <summary>
@@ -207,11 +207,11 @@ namespace SocalApp.Tests
             PostVisibility postVisibility = PostVisibility.Public;
             PostTag postTag = PostTag.Food;
 
-            postRepository.GetById(postId).Returns((Post)null); // Simulate post not found
+            postRepository.GetPostById(postId).Returns((Post)null); // Simulate post not found
 
             // Act & Assert
             Assert.Throws<Exception>(() => postService.UpdatePost(postId, title, content, postVisibility, postTag), "Post does not exist");
-            postRepository.Received(1).GetById(postId);
+            postRepository.Received(1).GetPostById(postId);
         }
 
         /// <summary>
@@ -235,14 +235,14 @@ namespace SocalApp.Tests
 
             Post post = new Post { Id = postId, Title = title, Content = content, UserId = 1, GroupId = 1, Visibility = postVisibility, Tag = postTag, CreatedDate = DateTime.Now };
 
-            postRepository.GetById(postId).Returns(post);
+            postRepository.GetPostById(postId).Returns(post);
 
             // Act
             postService.UpdatePost(postId, title, content, postVisibility, postTag);
 
             // Assert
-            postRepository.Received(1).GetById(postId);
-            postRepository.Received(1).UpdateById(postId, title, content, postVisibility, postTag);
+            postRepository.Received(1).GetPostById(postId);
+            postRepository.Received(1).UpdatePostById(postId, title, content, postVisibility, postTag);
         }
     }
 }
