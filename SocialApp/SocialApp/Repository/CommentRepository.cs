@@ -24,7 +24,7 @@ namespace SocialApp.Repository
         /// <summary>
         /// Retrieves all comments from the database
         /// </summary>
-        /// <returns>A list of all Comment entities in the system</returns>
+        /// <returns>A list of all Comment entities in the system.</returns>
         public List<Comment> GetAllComments()
         {
             SqlConnection connection1 = this.connection;
@@ -54,8 +54,8 @@ namespace SocialApp.Repository
         /// <summary>
         /// Retrieves all comments associated with a specific post
         /// </summary>
-        /// <param name="postId">The ID of the post to retrieve comments for</param>
-        /// <returns>A list of Comment entities for the specified post</returns>
+        /// <param name="postId">The ID of the post to retrieve comments for.</param>
+        /// <returns>A list of Comment entities for the specified post.</returns>
         public List<Comment> GetCommentsByPostId(long postId)
         {
             this.connection.Open();
@@ -82,9 +82,9 @@ namespace SocialApp.Repository
         }
 
         /// <summary>
-        /// Deletes a comment from the database by its ID
+        /// Deletes a comment from the database by its ID.
         /// </summary>
-        /// <param name="id">The ID of the comment to delete</param>
+        /// <param name="id">The ID of the comment to delete.</param>
         public void DeleteCommentById(long id)
         {
             this.connection.Open();
@@ -99,12 +99,12 @@ namespace SocialApp.Repository
         /// <summary>
         /// Retrieves a single comment by its ID
         /// </summary>
-        /// <param name="id">The ID of the comment to retrieve</param>
-        /// <returns>The Comment entity with the specified ID, or null if not found</returns>
+        /// <param name="id">The ID of the comment to retrieve.</param>
+        /// <returns>The Comment entity with the specified ID, or null if not found.</returns>
         public Comment? GetCommentById(long id) // Updated return type to Comment?
         {
             this.connection.Open();
-            Comment? comment = null; // Explicitly using nullable type
+            Comment? comment = null;
 
             SqlCommand selectCommand = new SqlCommand("SELECT * FROM Comments WHERE Id = @Id", this.connection);
             selectCommand.Parameters.AddWithValue("@Id", id);
@@ -130,7 +130,7 @@ namespace SocialApp.Repository
         /// <summary>
         /// Saves a new comment to the database
         /// </summary>
-        /// <param name="entity">The Comment entity to be saved</param>
+        /// <param name="entity">The Comment entity to be saved.</param>
         public void SaveComment(Comment entity)
         {
             this.connection.Open();
@@ -149,10 +149,10 @@ namespace SocialApp.Repository
         }
 
         /// <summary>
-        /// Updates the content of an existing comment
+        /// Updates the content of an existing comment.
         /// </summary>
-        /// <param name="id">The ID of the comment to update</param>
-        /// <param name="content">The new content for the comment</param>
+        /// <param name="id">The ID of the comment to update.</param>
+        /// <param name="content">The new content for the comment.</param>
         public void UpdateCommentContentById(long id, string content)
         {
             this.connection.Open();

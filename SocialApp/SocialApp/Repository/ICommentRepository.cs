@@ -9,7 +9,7 @@ namespace SocialApp.Repository
 
         List<Comment> GetAllComments();
 
-        Comment GetCommentById(long id);
+        Comment? GetCommentById(long id);
 
         List<Comment> GetCommentsByPostId(long postId);
 

@@ -44,8 +44,8 @@ namespace SocialApp.Services
                 throw new Exception("Comment does not exist");
             }
             CommentRepository.DeleteCommentById(commentId);
-
         }
+
         public void ValidateUpdate(long commentId, string content)
         {
             if (CommentRepository.GetCommentById(commentId) == null)
