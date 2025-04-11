@@ -14,23 +14,24 @@ namespace SocialApp.Pages
 {
     public sealed partial class LoginRegisterPage : Page
     {
-        private const Visibility collapsed = Visibility.Collapsed;
-        private const Visibility visible = Visibility.Visible;
-        private AppController controller;
-        private string image;
+        private const Visibility Collapsed = Visibility.Collapsed;
+        private const Visibility Visible = Visibility.Visible;
+        private AppController _controller;
+        private string _image;
+        private bool _isLoginFlow;
 
         public LoginRegisterPage()
         {
-            this.InitializeComponent();
-            this.InitialFlow();
+            InitializeComponent();
+            InitializePage();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            this.controller = App.Services.GetService<AppController>();
+            _controller = App.Services.GetService<AppController>();
         }
 
-        private void InitialFlow()
+        private void InitializePage()
         {
             SetInitialVisibilities();
             SetInitialContent();
@@ -39,21 +40,23 @@ namespace SocialApp.Pages
 
         private void SetInitialVisibilities()
         {
-            EmailTextbox.Visibility = visible;
-            UsernameTextbox.Visibility = collapsed;
-            PasswordTextbox.Visibility = collapsed;
-            ConfirmPasswordTextbox.Visibility = collapsed;
-            UploadedImage.Visibility = collapsed;
-            UploadImgButton.Visibility = collapsed;
-            RemoveImgButton.Visibility = collapsed;
-            CheckBox.Visibility = collapsed;
-            ContinueButton.Visibility = visible;
+            EmailTextbox.Visibility = Visible;
+            UsernameTextbox.Visibility = Collapsed;
+            PasswordTextbox.Visibility = Collapsed;
+            ConfirmPasswordTextbox.Visibility = Collapsed;
+            UploadedImage.Visibility = Collapsed;
+            UploadImgButton.Visibility = Collapsed;
+            RemoveImgButton.Visibility = Collapsed;
+            CheckBox.Visibility = Collapsed;
+            ContinueButton.Visibility = Visible;
+            ErrorTextbox.Visibility = Collapsed;
         }
 
         private void SetInitialContent()
         {
             PageName.Text = "Login/Register";
             ContinueButton.Content = "Continue";
+            ErrorTextbox.Text = string.Empty;
         }
 
         private void SetInitialHandlers()
@@ -61,19 +64,33 @@ namespace SocialApp.Pages
             ContinueButton.Click += ContinueClick;
         }
 
-        public void ContinueClick(object sender, RoutedEventArgs e)
+        private void ContinueClick(object sender, RoutedEventArgs e)
         {
-            if (controller.EmailExists(EmailTextbox.Text))
+            if (string.IsNullOrWhiteSpace(EmailTextbox.Text))
             {
-                LoginFlow();
+                ShowError("Please enter your email address");
+                return;
+            }
+
+            if (!IsValidEmail(EmailTextbox.Text))
+            {
+                ShowError("Please enter a valid email address");
+                return;
+            }
+
+            _isLoginFlow = _controller.EmailExists(EmailTextbox.Text);
+            
+            if (_isLoginFlow)
+            {
+                InitializeLoginFlow();
             }
             else
             {
-                RegisterFlow();
+                InitializeRegisterFlow();
             }
         }
 
-        private void LoginFlow()
+        private void InitializeLoginFlow()
         {
             SetLoginVisibilities();
             SetLoginContent();
@@ -82,14 +99,15 @@ namespace SocialApp.Pages
 
         private void SetLoginVisibilities()
         {
-            PasswordTextbox.Visibility = visible;
+            PasswordTextbox.Visibility = Visible;
+            ErrorTextbox.Visibility = Collapsed;
         }
 
         private void SetLoginContent()
         {
             PageName.Text = "Login";
             ContinueButton.Content = "Login";
-            ErrorTextbox.Text = "";
+            ErrorTextbox.Text = string.Empty;
         }
 
         private void SetLoginHandlers()
@@ -100,19 +118,31 @@ namespace SocialApp.Pages
 
         private void LoginClick(object sender, RoutedEventArgs e)
         {
-            if (!controller.Login(EmailTextbox.Text, PasswordTextbox.Password)) // Use Password property
+            if (string.IsNullOrWhiteSpace(PasswordTextbox.Password))
             {
-                ErrorTextbox.Visibility = visible;
-                ErrorTextbox.Text = "Incorrect password.";
-                PasswordTextbox.Password = ""; // Clear password
+                ShowError("Please enter your password");
+                return;
             }
-            else
+
+            try
             {
-                Frame.Navigate(typeof(HomeScreen), controller);
+                if (!_controller.Login(EmailTextbox.Text, PasswordTextbox.Password))
+                {
+                    ShowError("Incorrect password");
+                    PasswordTextbox.Password = string.Empty;
+                }
+                else
+                {
+                    Frame.Navigate(typeof(HomeScreen), _controller);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowError($"Login failed: {ex.Message}");
             }
         }
 
-        private void RegisterFlow()
+        private void InitializeRegisterFlow()
         {
             SetRegisterVisibilities();
             SetRegisterContent();
@@ -121,31 +151,53 @@ namespace SocialApp.Pages
 
         private void SetRegisterVisibilities()
         {
-            PasswordTextbox.Visibility = visible;
-            UsernameTextbox.Visibility = visible;
-            ConfirmPasswordTextbox.Visibility = visible;
-            UploadedImage.Visibility = visible;
-            UploadImgButton.Visibility = visible;
-            RemoveImgButton.Visibility = visible;
-            CheckBox.Visibility = visible;
+            PasswordTextbox.Visibility = Visible;
+            UsernameTextbox.Visibility = Visible;
+            ConfirmPasswordTextbox.Visibility = Visible;
+            UploadedImage.Visibility = Visible;
+            UploadImgButton.Visibility = Visible;
+            RemoveImgButton.Visibility = Visible;
+            CheckBox.Visibility = Visible;
+            ErrorTextbox.Visibility = Collapsed;
         }
 
         private void SetRegisterContent()
         {
             PageName.Text = "Register";
             ContinueButton.Content = "Register";
-            ErrorTextbox.Text = "";
+            ErrorTextbox.Text = string.Empty;
             UploadedImage.Child = new Image
             {
                 Source = new BitmapImage(new Uri("ms-appx:///Assets/User.png"))
             };
-            image = string.Empty;
+            _image = string.Empty;
         }
 
         private void SetRegisterHandlers()
         {
             ContinueButton.Click -= ContinueClick;
             ContinueButton.Click += RegisterClick;
+            UploadImgButton.Click += UploadImage;
+            RemoveImgButton.Click += RemoveImage;
+        }
+
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void ShowError(string message)
+        {
+            ErrorTextbox.Text = message;
+            ErrorTextbox.Visibility = Visible;
         }
 
         private async void UploadImage(object sender, RoutedEventArgs e)
@@ -167,7 +219,7 @@ namespace SocialApp.Pages
                 StorageFile file = await picker.PickSingleFileAsync();
                 if (file != null)
                 {
-                    image = await AppController.EncodeImageToBase64Async(file);
+                    _image = await AppController.EncodeImageToBase64Async(file);
                     var bitmapImage = new BitmapImage();
                     using (IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read))
                     {
@@ -184,7 +236,7 @@ namespace SocialApp.Pages
 
         private void RemoveImage(object sender, RoutedEventArgs e)
         {
-            image = string.Empty;
+            _image = string.Empty;
             UploadedImage.Child = new Image
             {
                 Source = new BitmapImage(new Uri("ms-appx:///Assets/User.png"))
@@ -225,8 +277,8 @@ namespace SocialApp.Pages
         {
             try
             {
-                controller.Register(UsernameTextbox.Text, EmailTextbox.Text, PasswordTextbox.Password, image); // Use Password property
-                Frame.Navigate(typeof(HomeScreen), controller);
+                _controller.Register(UsernameTextbox.Text, EmailTextbox.Text, PasswordTextbox.Password, _image); // Use Password property
+                Frame.Navigate(typeof(HomeScreen), _controller);
             }
             catch (Exception ex)
             {

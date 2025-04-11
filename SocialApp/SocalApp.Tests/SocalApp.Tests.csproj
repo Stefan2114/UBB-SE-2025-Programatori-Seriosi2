@@ -4,8 +4,10 @@
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	  <WindowsSdkPackageVersion>10.0.19041.38</WindowsSdkPackageVersion>
 
-    <IsPackable>false</IsPackable>
+
+	  <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
