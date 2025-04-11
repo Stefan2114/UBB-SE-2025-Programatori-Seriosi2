@@ -5,22 +5,40 @@ using System.Text;
 using System.Threading.Tasks;
 using SocialApp.Entities;
 using SocialApp.Repository;
-//test
+
+
 namespace SocialApp.Services
 {
-    public class CommentService : ICommentService // Changed to public
-    {
-        private readonly ICommentRepository CommentRepository; // Changed to readonly and camelCase
-        private readonly IPostRepository PostRepository;       // Changed to readonly and camelCase
-        private readonly IUserRepository UserRepository;       // Changed to readonly and camelCase
 
+    /// <summary>
+    /// Service for managing comments.
+    /// </summary>
+    public class CommentService : ICommentService
+    {
+        private readonly ICommentRepository commentRepository;
+        private readonly IPostRepository postRepository;
+        private readonly IUserRepository userRepository;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommentService"/> class.
+        /// </summary>
+        /// <param name="cr">The comment repository.</param>
+        /// <param name="pr">The post repository.</param>
+        /// <param name="userRepository">The user repository.</param>
         public CommentService(ICommentRepository cr, IPostRepository pr, IUserRepository userRepository)
         {
-            this.CommentRepository = cr ?? throw new ArgumentNullException(nameof(cr)); // Added null checks
-            this.PostRepository = pr ?? throw new ArgumentNullException(nameof(pr));    // Added null checks
-            this.UserRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository)); // Added null checks
+            this.commentRepository = cr ?? throw new ArgumentNullException(nameof(cr)); // Added null checks
+            this.postRepository = pr ?? throw new ArgumentNullException(nameof(pr));    // Added null checks
+            this.userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository)); // Added null checks
         }
 
+        /// <summary>
+        /// Validates and adds a new comment.
+        /// </summary>
+        /// <param name="content">The content of the comment.</param>
+        /// <param name="userId">The ID of the user adding the comment.</param>
+        /// <param name="postId">The ID of the post to which the comment is added.</param>
+        /// <returns>The created Comment object.</returns>
         public Comment ValidateAdd(string content, long userId, long postId)
         {
             if (string.IsNullOrWhiteSpace(content)) // Used IsNullOrWhiteSpace for better validation
@@ -28,12 +46,12 @@ namespace SocialApp.Services
                 throw new ArgumentException("Comment content cannot be empty or null.", nameof(content));
             }
 
-            if (UserRepository.GetById(userId) == null)
+            if (this.userRepository.GetById(userId) == null)
             {
                 throw new InvalidOperationException($"User with ID {userId} does not exist.");
             }
 
-            if (PostRepository.GetById(postId) == null)
+            if (this.postRepository.GetById(postId) == null)
             {
                 throw new InvalidOperationException($"Post with ID {postId} does not exist.");
             }
@@ -43,26 +61,31 @@ namespace SocialApp.Services
                 Content = content,
                 UserId = userId,
                 PostId = postId,
-                CreatedDate = DateTime.Now
+                CreatedDate = DateTime.Now,
             };
 
-            CommentRepository.Save(comment);
+            this.commentRepository.Save(comment);
             return comment;
         }
 
+        /// <summary>
+        /// Validates and deletes a comment by its ID.
+        /// </summary>
+        /// <param name="commentId">The ID of the comment to be deleted.</param>
+        /// <exception cref="InvalidOperationException">Thrown when the comment does not exist.</exception>
         public void ValidateDelete(long commentId)
         {
-            if (CommentRepository.GetById(commentId) == null)
+            if (commentRepository.GetById(commentId) == null)
             {
                 throw new InvalidOperationException($"Comment with ID {commentId} does not exist.");
             }
 
-            CommentRepository.DeleteById(commentId);
+            commentRepository.DeleteById(commentId);
         }
 
         public void ValidateUpdate(long commentId, string content)
         {
-            if (CommentRepository.GetById(commentId) == null)
+            if (commentRepository.GetById(commentId) == null)
             {
                 throw new Exception("Comment does not exist");
             }
@@ -70,20 +93,20 @@ namespace SocialApp.Services
             {
                 throw new Exception("Comment content cannot be empty");
             }
-            CommentRepository.UpdateById(commentId, content);
+            commentRepository.UpdateById(commentId, content);
         }
         public List<Comment> GetAll()
         {
-            return CommentRepository.GetAll();
+            return commentRepository.GetAll();
         }
         public Comment GetById(int id)
         {
-            return CommentRepository.GetById(id);
+            return commentRepository.GetById(id);
         }
 
         public List<Comment> GetCommentForPost(long postId)
         {
-            return CommentRepository.GetCommentsForPost(postId);
+            return commentRepository.GetCommentsForPost(postId);
         }
     }
 }
