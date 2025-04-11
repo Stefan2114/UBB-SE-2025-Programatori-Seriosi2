@@ -1,16 +1,16 @@
-using System.Collections.Generic;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
-using SocialApp.Services;
-using SocialApp.Repository;
-using SocialApp.Components;
-using SocialApp.Entities;
-using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-
 namespace SocialApp.Pages
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Navigation;
+    using SocialApp.Components;
+    using SocialApp.Entities;
+    using SocialApp.Repository;
+    using SocialApp.Services;
+
     public sealed partial class UserPage : Page
     {
         private AppController controller;
@@ -25,15 +25,17 @@ namespace SocialApp.Pages
         {
             this.InitializeComponent();
 
-            userRepository = new UserRepository();
-            userService = new UserService(userRepository);
-            postRepository = new PostRepository();
-            groupRepository = new GroupRepository();
-            postService = new PostService(postRepository, userRepository, groupRepository);
-            controller = App.Services.GetService<AppController>();
+            this.userRepository = new UserRepository();
+            this.userService = new UserService(this.userRepository);
+            this.postRepository = new PostRepository();
+            this.groupRepository = new GroupRepository();
+            this.postService = new PostService(this.postRepository, this.userRepository, this.groupRepository);
 
-            this.Loaded += SetContent;
-            this.Loaded += PostsClick;
+            // Use null-coalescing operator to handle potential null reference
+            this.controller = App.Services.GetService<AppController>() ?? throw new System.InvalidOperationException("AppController service is not registered.");
+
+            this.Loaded += this.SetContent;
+            this.Loaded += this.PostsClick;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

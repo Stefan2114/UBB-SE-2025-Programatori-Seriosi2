@@ -28,7 +28,7 @@ namespace SocialApp.Repository
             connection.Open();
             List<Post> posts = new List<Post>();
 
-            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Posts", connection);
+            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Posts", zconnection);
             SqlDataReader reader = selectCommand.ExecuteReader();
             while (reader.Read())
             {
@@ -50,7 +50,6 @@ namespace SocialApp.Repository
             connection.Close();
             return posts;
         }
-        //ver
 
         public List<Post> GetHomeFeed(long userId)
         {
