@@ -5,11 +5,11 @@ namespace SocialApp.Repository
 {
     public interface ICommentRepository
     {
-        void DeleteById(long id);
-        List<Comment> GetAll();
-        Comment GetById(long id);
-        List<Comment> GetCommentsForPost(long postId);
-        void Save(Comment entity);
-        void UpdateById(long id, string content);
+        void DeleteCommentById(long id);
+        List<Comment> GetAllComments();
+        Comment GetCommentById(long id);
+        List<Comment> GetCommentsByPostId(long postId);
+        void SaveComment(Comment entity);
+        void UpdateCommentContentById(long id, string content);
     }
 }
