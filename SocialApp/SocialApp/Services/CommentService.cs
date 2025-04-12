@@ -34,17 +34,16 @@ namespace SocialApp.Services
                 throw new Exception("Post does not exist");
             }
             Comment comment = new Comment() { Content = content, UserId = userId, PostId = postId, CreatedDate = DateTime.Now };
-            CommentRepository.Save(comment);
+            CommentRepository.SaveComment(comment);
             return comment;
         }
         public void ValidateDelete(long commentId)
         {
-            if (CommentRepository.GetById(commentId) == null)
+            if (CommentRepository.GetCommentById(commentId) == null)
             {
                 throw new Exception("Comment does not exist");
             }
-            CommentRepository.DeleteById(commentId);
-
+            CommentRepository.DeleteCommentById(commentId);
         }
 
         /// <summary>
@@ -57,6 +56,7 @@ namespace SocialApp.Services
         public void UpdateComment(long commentId, string content)
         {
             if (this.CommentRepository.GetById(commentId) == null)
+
             {
                 throw new Exception("Comment does not exist");
             }
@@ -64,7 +64,8 @@ namespace SocialApp.Services
             {
                 throw new Exception("Comment content cannot be empty");
             }
-            this.CommentRepository.UpdateById(commentId, content);
+            this.CommentRepository.UpdateCommentContentById(commentId, content);
+
         }
 
         /// <summary>
@@ -73,7 +74,8 @@ namespace SocialApp.Services
         /// <returns> A list of all the comments.</returns>
         public List<Comment> GetAllComments()
         {
-            return this.CommentRepository.GetAll();
+            return this.CommentRepository.GetAllComments();
+
         }
 
         /// <summary>
@@ -83,7 +85,8 @@ namespace SocialApp.Services
         /// <returns>The comment with the specified ID.</returns>
         public Comment GetCommentById(int commentId)
         {
-            return this.CommentRepository.GetById(commentId);
+            return this.CommentRepository.GetCommentById(commentId);
+
         }
 
         /// <summary>
@@ -93,7 +96,7 @@ namespace SocialApp.Services
         /// <returns>A list of comments specified by the post.</returns>
         public List<Comment> GetCommentsByPostId(long postId)
         {
-            return this.CommentRepository.GetCommentsForPost(postId);
+            return this.CommentRepository.GetCommentsByPostId(postId);
         }
     }
 }

@@ -12,8 +12,8 @@ namespace SocialApp.Services
         List<User> GetUserFollowing(long id);
         List<User> SearchUsers(long userId, string query);
         void UnfollowUser(long userId, long whoToUnfollowId);
-        void ValidateAdd(string username, string email, string password, string image);
-        void ValidateDelete(long id);
-        void ValidateUpdate(long id, string username, string email, string password, string? image);
+        void AddUser(string username, string email, string password, string image);
+        void DeleteUser(long id);
+        void UpdateUser(long id, string username, string email, string password, string? image);
     }
 }
