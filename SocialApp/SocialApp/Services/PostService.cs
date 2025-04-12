@@ -56,7 +56,7 @@ namespace SocialApp.Services
                 }
             }
             Post post = new Post() { Title = title, Content = content, UserId = userId, GroupId = groupId, Visibility = postVisibility, Tag = postTag, CreatedDate = DateTime.Now };
-            this.postRepository.Save(post);
+            this.postRepository.SavePost(post);
             return post;
         }
 
@@ -66,11 +66,11 @@ namespace SocialApp.Services
         /// <param name="id">The ID of the post to delete.</param>
         public void DeletePost(long id)
         {
-            if (this.postRepository.GetById(id) == null)
+            if (this.postRepository.GetPostById(id) == null)
             {
                 throw new Exception("Post does not exist");
             }
-            this.postRepository.DeleteById(id);
+            this.postRepository.DeletePostById(id);
         }
 
         /// <summary>
@@ -83,11 +83,11 @@ namespace SocialApp.Services
         /// <param name="tag">The new tag of the post.</param>
         public void UpdatePost(long id, string title, string description, PostVisibility visibility, PostTag tag)
         {
-            if (this.postRepository.GetById(id) == null)
+            if (this.postRepository.GetPostById(id) == null)
             {
                 throw new Exception("Post does not exist");
             }
-            this.postRepository.UpdateById(id, title, description, visibility, tag);
+            this.postRepository.UpdatePostById(id, title, description, visibility, tag);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace SocialApp.Services
         /// <returns>A list of all posts.</returns>
         public List<Post> GetAllPosts()
         {
-            return this.postRepository.GetAll();
+            return this.postRepository.GetAllPosts();
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace SocialApp.Services
         /// <returns>The post with the specified ID.</returns>
         public Post GetPostById(long id)
         {
-            return this.postRepository.GetById(id);
+            return this.postRepository.GetPostById(id);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace SocialApp.Services
         /// <returns>A list of posts by the specified user.</returns>
         public List<Post> GePostsByUserId(long userId)
         {
-            return this.postRepository.GetByUser(userId);
+            return this.postRepository.GetPostsByUserId(userId);
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace SocialApp.Services
         /// <returns>A list of posts in the specified group.</returns>
         public List<Post> GetPostsByGroupId(long groupId)
         {
-            return this.postRepository.GetByGroup(groupId);
+            return this.postRepository.GetPostsByGroupId(groupId);
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace SocialApp.Services
         /// <returns>A list of posts for the user's home feed.</returns>
         public List<Post> GetPostsHomeFeed(long userId)
         {
-            return this.postRepository.GetHomeFeed(userId);
+            return this.postRepository.GetPostsHomeFeed(userId);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace SocialApp.Services
         /// <returns>A list of posts for the user's group feed.</returns>
         public List<Post> GetPostsGroupsFeed(long userId)
         {
-            return this.postRepository.GetGroupsFeed(userId);
+            return this.postRepository.GetPostsGroupsFeed(userId);
         }
     }
 }
