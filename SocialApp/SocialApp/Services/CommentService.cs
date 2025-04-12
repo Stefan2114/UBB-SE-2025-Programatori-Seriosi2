@@ -34,21 +34,21 @@ namespace SocialApp.Services
                 throw new Exception("Post does not exist");
             }
             Comment comment = new Comment() { Content = content, UserId = userId, PostId = postId, CreatedDate = DateTime.Now };
-            CommentRepository.Save(comment);
+            CommentRepository.SaveComment(comment);
             return comment;
         }
         public void ValidateDelete(long commentId)
         {
-            if (CommentRepository.GetById(commentId) == null)
+            if (CommentRepository.GetCommentById(commentId) == null)
             {
                 throw new Exception("Comment does not exist");
             }
-            CommentRepository.DeleteById(commentId);
-
+            CommentRepository.DeleteCommentById(commentId);
         }
+
         public void ValidateUpdate(long commentId, string content)
         {
-            if (CommentRepository.GetById(commentId) == null)
+            if (CommentRepository.GetCommentById(commentId) == null)
             {
                 throw new Exception("Comment does not exist");
             }
@@ -56,20 +56,20 @@ namespace SocialApp.Services
             {
                 throw new Exception("Comment content cannot be empty");
             }
-            CommentRepository.UpdateById(commentId, content);
+            CommentRepository.UpdateCommentContentById(commentId, content);
         }
         public List<Comment> GetAll()
         {
-            return CommentRepository.GetAll();
+            return CommentRepository.GetAllComments();
         }
         public Comment GetById(int id)
         {
-            return CommentRepository.GetById(id);
+            return CommentRepository.GetCommentById(id);
         }
 
         public List<Comment> GetCommentForPost(long postId)
         {
-            return CommentRepository.GetCommentsForPost(postId);
+            return CommentRepository.GetCommentsByPostId(postId);
         }
     }
 }
