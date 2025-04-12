@@ -13,95 +13,141 @@ namespace SocialApp.Pages
 {
     public sealed partial class GroupPage : Page
     {
-        private const Visibility collapsed = Visibility.Collapsed;
-        private const Visibility visible = Visibility.Visible;
-        private UserRepository userRepository;
-        private UserService userService;
-        private PostRepository postRepository;
-        private PostService postService;
-        private GroupRepository groupRepository;
-        private GroupService groupService;
-        private long GroupId;
-        private Entities.Group group;
+        private const Visibility Collapsed = Visibility.Collapsed;
+        private const Visibility Visible = Visibility.Visible;
+
+        private readonly IUserRepository _userRepository;
+        private readonly IUserService _userService;
+        private readonly IPostRepository _postRepository;
+        private readonly IPostService _postService;
+        private readonly IGroupRepository _groupRepository;
+        private readonly IGroupService _groupService;
+
+        private long _groupId;
+        private Entities.Group _group;
+        private AppController _controller;
 
         public GroupPage()
         {
-            this.InitializeComponent();
-            this.Loaded += DisplayPage;
+            InitializeComponent();
+            InitializeServices();
+            Loaded += OnPageLoaded;
+        }
+
+        private void InitializeServices()
+        {
+            _userRepository = new UserRepository();
+            _userService = new UserService(_userRepository);
+            _groupRepository = new GroupRepository();
+            _groupService = new GroupService(_groupRepository, _userRepository);
+            _postRepository = new PostRepository();
+            _postService = new PostService(_postRepository, _userRepository, _groupRepository);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             if (e.Parameter is long id)
             {
-                GroupId = id;
+                _groupId = id;
             }
-            TopBar.SetFrame(this.Frame);
+
+            _controller = App.Services.GetService<AppController>();
+            InitializeTopBar();
+        }
+
+        private void InitializeTopBar()
+        {
+            TopBar.SetFrame(Frame);
             TopBar.SetNone();
         }
 
-        private void DisplayPage(object sender, RoutedEventArgs e)
+        private async void OnPageLoaded(object sender, RoutedEventArgs e)
         {
-            userRepository = new UserRepository();
-            userService = new UserService(userRepository);
-            groupRepository = new GroupRepository();
-            groupService = new GroupService(groupRepository, userRepository);
-            postRepository = new PostRepository();
-            postService = new PostService(postRepository, userRepository, groupRepository);
-            group = groupService.GetById(GroupId);
-
-            SetVisibilities();
-            SetContent();
-            PopulateMembers();
+            await LoadGroupDataAsync();
+            InitializeUI();
         }
 
-        private void SetVisibilities()
+        private async Task LoadGroupDataAsync()
         {
-            bool isAdmin = UserIsAdmin();
+            _group = _groupService.GetById(_groupId);
+
+            if (!string.IsNullOrEmpty(_group.Image))
+            {
+                GroupImage.Source = await AppController.DecodeBase64ToImageAsync(_group.Image);
+            }
         }
 
-        private bool UserIsAdmin()
+        private void InitializeUI()
         {
-            var controller = App.Services.GetService<AppController>();
-            if (controller.CurrentUser == null) return false;
-            return groupRepository.GetById(GroupId).AdminId == controller.CurrentUser.Id;
-        }
-
-        private async void SetContent()
-        {
-            GroupTitle.Text = group.Name;
-            GroupDescription.Text = group.Description;
-            if (!string.IsNullOrEmpty(group.Image))
-                GroupImage.Source = await AppController.DecodeBase64ToImageAsync(group.Image);
+            SetGroupInfo();
             PopulateFeed();
+            PopulateMembers();
+            SetAdminControlsVisibility();
+        }
+
+        private void SetGroupInfo()
+        {
+            GroupTitle.Text = _group.Name;
+            GroupDescription.Text = _group.Description;
         }
 
         private void PopulateFeed()
         {
             PostsFeed.ClearPosts();
-            List<Post> groupPosts = postService.GetPostsByGroupId(GroupId);
-            foreach (Post post in groupPosts)
+            var groupPosts = _postService.GetPostsByGroupId(_groupId);
+
+            foreach (var post in groupPosts)
             {
-                PostsFeed.AddPost(new PostComponent(post.Title, post.Visibility, post.UserId, post.Content, post.CreatedDate, post.Tag, post.Id));
+                PostsFeed.AddPost(new PostComponent(
+                    post.Title,
+                    post.Visibility,
+                    post.UserId,
+                    post.Content,
+                    post.CreatedDate,
+                    post.Tag,
+                    post.Id));
             }
-            PostsFeed.Visibility = Visibility.Visible;
+
+            PostsFeed.Visibility = Visible;
             PostsFeed.DisplayCurrentPage();
         }
 
         private void PopulateMembers()
         {
             MembersList.Children.Clear();
-            bool isAdmin = UserIsAdmin();
-            List<User> members = groupService.GetUsersFromGroup(GroupId);
-            foreach (User member in members)
+            var isAdmin = IsCurrentUserAdmin();
+            var members = _groupService.GetUsersFromGroup(_groupId);
+
+            foreach (var member in members)
             {
-                MembersList.Children.Add(new Member(member, this.Frame, GroupId, isAdmin));
+                MembersList.Children.Add(new Member(member, Frame, _groupId, isAdmin));
             }
+        }
+
+        private void SetAdminControlsVisibility()
+        {
+            var isAdmin = IsCurrentUserAdmin();
+            // Set visibility of admin-only controls here
+            // Example: AdminPanel.Visibility = isAdmin ? Visible : Collapsed;
+        }
+
+        private bool IsCurrentUserAdmin()
+        {
+            return _controller.CurrentUser != null &&
+                   _group.AdminId == _controller.CurrentUser.Id;
         }
 
         private void CreatePostInGroupButton_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(CreatePost));
+            Frame.Navigate(typeof(CreatePost), new PostNavigationParams
+            {
+                GroupId = _groupId
+            });
         }
+    }
+
+    public class PostNavigationParams
+    {
+        public long GroupId { get; set; }
     }
 }
