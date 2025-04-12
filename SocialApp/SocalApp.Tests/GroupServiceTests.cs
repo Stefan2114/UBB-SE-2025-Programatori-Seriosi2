@@ -159,7 +159,7 @@
             var users = new List<User>
     {
         new User { Username = "User1", Email = "Email1", PasswordHash = "PasswordHash1", Image = "Image1" },
-        new User { Username = "User2", Email = "Email2", PasswordHash = "PasswordHash2", Image = "Image2" }
+        new User { Username = "User2", Email = "Email2", PasswordHash = "PasswordHash2", Image = "Image2" },
     };
             this.groupRepository.GetById(groupId).Returns(new Group
             {
@@ -189,7 +189,7 @@
             var groups = new List<Group>
     {
         new Group { Name = "Group1", Image = "Image1", Description = "Description1", AdminId = 1 },
-        new Group { Name = "Group2", Image = "Image2", Description = "Description2", AdminId = 2 }
+        new Group { Name = "Group2", Image = "Image2", Description = "Description2", AdminId = 2 },
     };
             this.userRepository.GetById(userId).Returns(new User
             {
@@ -197,7 +197,7 @@
                 Username = "TestUser",
                 Email = "test@example.com",
                 PasswordHash = "hashedpassword",
-                Image = "imagepath"
+                Image = "imagepath",
             });
             this.groupRepository.GetGroupsForUser(userId).Returns(groups);
 
