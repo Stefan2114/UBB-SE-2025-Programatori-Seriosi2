@@ -28,7 +28,7 @@ namespace SocialApp.Repository
             connection.Open();
             List<Post> posts = new List<Post>();
 
-            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Posts", zconnection);
+            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Posts", connection);
             SqlDataReader reader = selectCommand.ExecuteReader();
             while (reader.Read())
             {
@@ -41,7 +41,7 @@ namespace SocialApp.Repository
                     UserId = reader.GetInt64(reader.GetOrdinal("UserId")),
                     GroupId = reader.IsDBNull(reader.GetOrdinal("GroupId")) ? 0 : reader.GetInt64(reader.GetOrdinal("GroupId")),
                     Visibility = (PostVisibility)reader.GetInt32(reader.GetOrdinal("PostVisibility")),
-                    Tag = reader.IsDBNull(reader.GetOrdinal("PostTag")) ? PostTag.Misc : (PostTag)reader.GetInt32(reader.GetOrdinal("PostTag"))
+                    Tag = reader.IsDBNull(reader.GetOrdinal("PostTag")) ? PostTag.Misc : (PostTag)reader.GetInt32(reader.GetOrdinal("PostTag")),
                 };
                 posts.Add(post);
             }

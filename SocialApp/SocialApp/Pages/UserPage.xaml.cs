@@ -43,166 +43,171 @@ namespace SocialApp.Pages
             if (e.Parameter is UserPageNavigationArgs args)
             {
                 this.displayedUser = args.SelectedUser;
-                TopBar.SetFrame(this.Frame);
+                this.TopBar.SetFrame(this.Frame);
             }
             else
             {
-                this.displayedUser = controller.CurrentUser; // Default to CurrentUser if no specific user provided
-                TopBar.SetFrame(this.Frame);
+                this.displayedUser = this.controller.CurrentUser; // Default to CurrentUser if no specific user provided
+                this.TopBar.SetFrame(this.Frame);
             }
         }
 
         private async void SetContent(object sender, RoutedEventArgs e)
         {
-            if (displayedUser != null)
+            if (this.displayedUser != null)
             {
-                if (!string.IsNullOrEmpty(displayedUser.Image))
-                    ProfileImage.Source = await AppController.DecodeBase64ToImageAsync(displayedUser.Image);
-                Username.Text = displayedUser.Username;
-
-                if (controller.CurrentUser != null && controller.CurrentUser.Id == displayedUser.Id)
+                if (!string.IsNullOrEmpty(this.displayedUser.Image))
                 {
-                    FollowLogOutButton.Content = "Logout";
-                    FollowLogOutButton.Click -= Logout;
-                    FollowLogOutButton.Click += Logout;
+                    this.ProfileImage.Source = await AppController.DecodeBase64ToImageAsync(this.displayedUser.Image);
+                }
+
+                this.Username.Text = this.displayedUser.Username;
+
+                if (this.controller.CurrentUser != null && this.controller.CurrentUser.Id == this.displayedUser.Id)
+                {
+                    this.FollowLogOutButton.Content = "Logout";
+                    this.FollowLogOutButton.Click -= this.Logout;
+                    this.FollowLogOutButton.Click += this.Logout;
                 }
                 else
                 {
-                    FollowLogOutButton.Content = IsFollowed() ? "Unfollow" : "Follow";
-                    FollowLogOutButton.Click -= FollowUnfollow;
-                    FollowLogOutButton.Click += FollowUnfollow;
+                    this.FollowLogOutButton.Content = this.IsFollowed() ? "Unfollow" : "Follow";
+                    this.FollowLogOutButton.Click -= this.FollowUnfollow;
+                    this.FollowLogOutButton.Click += this.FollowUnfollow;
                 }
-                SetPostsContent(sender, e);
+
+                this.SetPostsContent(sender, e);
             }
             else
             {
-                FollowLogOutButton.Content = "Follow";
+                this.FollowLogOutButton.Content = "Follow";
             }
         }
 
         private bool IsFollowed()
         {
             // Check if CurrentUser follows displayedUser
-            return controller?.CurrentUser != null && userService.GetUserFollowing(controller.CurrentUser.Id).Any(u => u.Id == displayedUser.Id);
+            return this.controller?.CurrentUser != null && this.userService.GetUserFollowing(this.controller.CurrentUser.Id).Any(u => u.Id == this.displayedUser.Id);
         }
 
         private void FollowUnfollow(object sender, RoutedEventArgs e)
         {
-            if (controller?.CurrentUser != null && displayedUser != null)
+            if (this.controller?.CurrentUser != null && this.displayedUser != null)
             {
-                if (IsFollowed())
+                if (this.IsFollowed())
                 {
-                    userService.UnfollowUser(controller.CurrentUser.Id, displayedUser.Id);
-                    FollowLogOutButton.Content = "Follow";
+                    this.userService.UnfollowUser(this.controller.CurrentUser.Id, this.displayedUser.Id);
+                    this.FollowLogOutButton.Content = "Follow";
                 }
                 else
                 {
-                    userService.FollowUser(controller.CurrentUser.Id, displayedUser.Id);
-                    FollowLogOutButton.Content = "Unfollow";
+                    this.userService.FollowUser(this.controller.CurrentUser.Id, this.displayedUser.Id);
+                    this.FollowLogOutButton.Content = "Unfollow";
                 }
             }
         }
 
         private void Logout(object sender, RoutedEventArgs e)
         {
-            controller.Logout();
-            Frame.Navigate(typeof(HomeScreen), controller);
+            this.controller.Logout();
+            this.Frame.Navigate(typeof(HomeScreen), this.controller);
         }
 
         private void PostsClick(object sender, RoutedEventArgs e)
         {
-            SetPostsContent(sender, e);
-            PostsFeed.DisplayCurrentPage();
+            this.SetPostsContent(sender, e);
+            this.PostsFeed.DisplayCurrentPage();
         }
 
         private void SetPostsContent(object sender, RoutedEventArgs e)
         {
-            PostsButton.IsEnabled = false;
-            WorkoutsButton.IsEnabled = true;
-            MealsButton.IsEnabled = true;
-            FollowersButton.IsEnabled = true;
+            this.PostsButton.IsEnabled = false;
+            this.WorkoutsButton.IsEnabled = true;
+            this.MealsButton.IsEnabled = true;
+            this.FollowersButton.IsEnabled = true;
 
-            PostsFeed.Visibility = Visibility.Visible;
-            FollowersScrollViewer.Visibility = Visibility.Collapsed;
+            this.PostsFeed.Visibility = Visibility.Visible;
+            this.FollowersScrollViewer.Visibility = Visibility.Collapsed;
 
-            PopulateFeed();
+            this.PopulateFeed();
         }
 
         private void PopulateFeed()
         {
-            PostsFeed.ClearPosts();
+            this.PostsFeed.ClearPosts();
 
-            if (displayedUser != null)
+            if (this.displayedUser != null)
             {
-                List<Post> userPosts = postService.GePostsByUserId(displayedUser.Id);
+                List<Post> userPosts = this.postService.GePostsByUserId(this.displayedUser.Id);
                 foreach (Post post in userPosts)
                 {
-                    PostsFeed.AddPost(new PostComponent(post.Title, post.Visibility, post.UserId, post.Content, post.CreatedDate, post.Tag, post.Id));
+                    this.PostsFeed.AddPost(new PostComponent(post.Title, post.Visibility, post.UserId, post.Content, post.CreatedDate, post.Tag, post.Id));
                 }
-                PostsFeed.DisplayCurrentPage();
+
+                this.PostsFeed.DisplayCurrentPage();
             }
         }
 
         private void WorkoutsClick(object sender, RoutedEventArgs e)
         {
-            SetWorkoutsContent();
+            this.SetWorkoutsContent();
         }
 
         private void SetWorkoutsContent()
         {
-            PostsButton.IsEnabled = true;
-            WorkoutsButton.IsEnabled = false;
-            MealsButton.IsEnabled = true;
-            FollowersButton.IsEnabled = true;
+            this.PostsButton.IsEnabled = true;
+            this.WorkoutsButton.IsEnabled = false;
+            this.MealsButton.IsEnabled = true;
+            this.FollowersButton.IsEnabled = true;
 
-            PostsFeed.Visibility = Visibility.Collapsed;
-            FollowersScrollViewer.Visibility = Visibility.Collapsed;
+            this.PostsFeed.Visibility = Visibility.Collapsed;
+            this.FollowersScrollViewer.Visibility = Visibility.Collapsed;
         }
 
         private void MealsClick(object sender, RoutedEventArgs e)
         {
-            SetMealsContent();
+            this.SetMealsContent();
         }
 
         private void SetMealsContent()
         {
-            PostsButton.IsEnabled = true;
-            WorkoutsButton.IsEnabled = true;
-            MealsButton.IsEnabled = false;
-            FollowersButton.IsEnabled = true;
+            this.PostsButton.IsEnabled = true;
+            this.WorkoutsButton.IsEnabled = true;
+            this.MealsButton.IsEnabled = false;
+            this.FollowersButton.IsEnabled = true;
 
-            PostsFeed.Visibility = Visibility.Collapsed;
-            FollowersScrollViewer.Visibility = Visibility.Collapsed;
+            this.PostsFeed.Visibility = Visibility.Collapsed;
+            this.FollowersScrollViewer.Visibility = Visibility.Collapsed;
         }
 
         private void FollowersClick(object sender, RoutedEventArgs e)
         {
-            SetFollowersContent();
+            this.SetFollowersContent();
         }
 
         private void SetFollowersContent()
         {
-            PostsButton.IsEnabled = true;
-            WorkoutsButton.IsEnabled = true;
-            MealsButton.IsEnabled = true;
-            FollowersButton.IsEnabled = false;
+            this.PostsButton.IsEnabled = true;
+            this.WorkoutsButton.IsEnabled = true;
+            this.MealsButton.IsEnabled = true;
+            this.FollowersButton.IsEnabled = false;
 
-            PostsFeed.Visibility = Visibility.Collapsed;
-            FollowersScrollViewer.Visibility = Visibility.Visible;
+            this.PostsFeed.Visibility = Visibility.Collapsed;
+            this.FollowersScrollViewer.Visibility = Visibility.Visible;
 
-            PopulateFollowers();
+            this.PopulateFollowers();
         }
 
         private void PopulateFollowers()
         {
-            FollowersStack.Children.Clear();
+            this.FollowersStack.Children.Clear();
 
-            if (displayedUser != null)
+            if (this.displayedUser != null)
             {
-                List<User> followers = userService.GetUserFollowers(displayedUser.Id);
+                List<User> followers = this.userService.GetUserFollowers(this.displayedUser.Id);
                 foreach (User user in followers)
                 {
-                    FollowersStack.Children.Add(new Follower(user.Username, userService.GetUserFollowing(controller.CurrentUser?.Id ?? -1).Contains(user), user, this.Frame));
+                    this.FollowersStack.Children.Add(new Follower(user.Username, this.userService.GetUserFollowing(this.controller.CurrentUser?.Id ?? -1).Contains(user), user, this.Frame));
                 }
             }
         }
