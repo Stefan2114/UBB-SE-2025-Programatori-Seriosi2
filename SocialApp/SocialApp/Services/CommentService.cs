@@ -27,9 +27,9 @@ namespace SocialApp.Services
         /// <param name="userRepository">The user repository.</param>
         public CommentService(ICommentRepository cr, IPostRepository pr, IUserRepository userRepository)
         {
-            this.commentRepository = cr ?? throw new ArgumentNullException(nameof(cr)); // Added null checks
-            this.postRepository = pr ?? throw new ArgumentNullException(nameof(pr));    // Added null checks
-            this.userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository)); // Added null checks
+            this.commentRepository = cr;
+            this.postRepository = pr;    // Added null checks
+            this.userRepository = userRepository; // Added null checks
         }
 
         /// <summary>
@@ -39,9 +39,9 @@ namespace SocialApp.Services
         /// <param name="userId">The ID of the user adding the comment.</param>
         /// <param name="postId">The ID of the post to which the comment is added.</param>
         /// <returns>The created Comment object.</returns>
-        public Comment ValidateAdd(string content, long userId, long postId)
+        public Comment AddComment(string content, long userId, long postId)
         {
-            if (string.IsNullOrWhiteSpace(content)) // Used IsNullOrWhiteSpace for better validation
+            if (content == null || content.Length == 0)
             {
                 throw new ArgumentException("Comment content cannot be empty or null.", nameof(content));
             }

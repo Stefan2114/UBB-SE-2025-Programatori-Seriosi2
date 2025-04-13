@@ -182,7 +182,7 @@ namespace SocialApp.Components
             string commentText = CommentTextBox.Text;
             if (!string.IsNullOrEmpty(commentText))
             {
-                commentService.ValidateAdd(commentText, userId, postId);
+                commentService.AddComment(commentText, userId, postId);
                 CommentTextBox.Text = string.Empty;
                 CommentSection.Visibility = Visibility.Collapsed;
             }

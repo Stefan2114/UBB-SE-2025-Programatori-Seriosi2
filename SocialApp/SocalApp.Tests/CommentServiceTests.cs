@@ -36,7 +36,7 @@ namespace SocialApp.Tests
             postRepository.GetById(postId).Returns(post);
 
             // Act
-            var result = commentService.ValidateAdd(content, userId, postId);
+            var result = commentService.AddComment(content, userId, postId);
 
             // Assert
             Assert.NotNull(result);
@@ -64,7 +64,7 @@ namespace SocialApp.Tests
             long postId = 2;
 
             // Act & Assert
-            var ex = Assert.Throws<ArgumentException>(() => commentService.ValidateAdd(emptyContent, userId, postId));
+            var ex = Assert.Throws<ArgumentException>(() => commentService.AddComment(emptyContent, userId, postId));
             Assert.That(ex.Message, Is.EqualTo("Comment content cannot be empty or null. (Parameter 'content')"));
         }
 
@@ -88,7 +88,7 @@ namespace SocialApp.Tests
             userRepository.GetById(invalidUserId).Returns((User)null);
 
             // Act & Assert
-            var ex = Assert.Throws<InvalidOperationException>(() => commentService.ValidateAdd(content, invalidUserId, postId));
+            var ex = Assert.Throws<InvalidOperationException>(() => commentService.AddComment(content, invalidUserId, postId));
             Assert.That(ex.Message, Is.EqualTo($"User with ID {invalidUserId} does not exist."));
             userRepository.Received(1).GetById(invalidUserId);
         }
@@ -117,7 +117,7 @@ namespace SocialApp.Tests
             postRepository.GetById(invalidPostId).Returns((Post)null);
 
             // Act & Assert
-            var ex = Assert.Throws<InvalidOperationException>(() => commentService.ValidateAdd(content, userId, invalidPostId));
+            var ex = Assert.Throws<InvalidOperationException>(() => commentService.AddComment(content, userId, invalidPostId));
             Assert.That(ex.Message, Is.EqualTo($"Post with ID {invalidPostId} does not exist."));
             postRepository.Received(1).GetById(invalidPostId);
         }
