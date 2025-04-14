@@ -37,7 +37,7 @@ namespace SocalApp.Tests
             var userService = new UserService(userRepository);
 
             // Act
-            var result = userService.GetAll();
+            var result = userService.GetAllUsers();
 
             // Assert
             Assert.IsNotNull(result);  // Now it won't be null
@@ -98,7 +98,7 @@ namespace SocalApp.Tests
                 };
             userRepository.GetUserFollowers(userId).Returns(expectedFollowers);
             // Act
-            var result = userService.GetUserFollowers(userId);
+            var result = userService.GetUserFollowersFromId(userId);
             // Assert
             Assert.IsNotNull(result);
             Assert.That(result, Is.EqualTo(expectedFollowers));
@@ -114,7 +114,7 @@ namespace SocalApp.Tests
             userRepository.GetUserFollowers(invalidUserId).Returns(new List<User>());
 
             // Act
-            var result = userService.GetUserFollowers(invalidUserId);
+            var result = userService.GetUserFollowersFromId(invalidUserId);
 
             // Assert
             Assert.IsNotNull(result);
@@ -179,7 +179,7 @@ namespace SocalApp.Tests
             userRepository.GetById(followedId).Returns(new User { Id = followedId, Username = "followed", Email = "followed@example.com", PasswordHash = "hash2", Image = "img2.png" });
 
             // Act & Assert
-            Assert.DoesNotThrow(() => userService.FollowUser(followerId, followedId));
+            Assert.DoesNotThrow(() => userService.FollowUserById(followerId, followedId));
             userRepository.Received(1).Follow(followerId, followedId);
         }
 
@@ -196,7 +196,7 @@ namespace SocalApp.Tests
             userRepository.GetById(followedId).Returns(new User { Id = followedId, Username = "followed", Email = "followed@example.com", PasswordHash = "hash2", Image = "img2.png" });
 
             // Act & Assert
-            var ex = Assert.Throws<Exception>(() => userService.FollowUser(nonExistentFollowerId, followedId));
+            var ex = Assert.Throws<Exception>(() => userService.FollowUserById(nonExistentFollowerId, followedId));
             Assert.That(ex.Message, Is.EqualTo("User does not exist"));
             userRepository.DidNotReceive().Follow(Arg.Any<long>(), Arg.Any<long>());
         }
@@ -214,7 +214,7 @@ namespace SocalApp.Tests
             userRepository.GetById(nonExistentFollowedId).Returns((User)null);
 
             // Act & Assert
-            var ex = Assert.Throws<Exception>(() => userService.FollowUser(followerId, nonExistentFollowedId));
+            var ex = Assert.Throws<Exception>(() => userService.FollowUserById(followerId, nonExistentFollowedId));
             Assert.That(ex.Message, Is.EqualTo("User to follow does not exist"));
             userRepository.DidNotReceive().Follow(Arg.Any<long>(), Arg.Any<long>());
         }
@@ -232,7 +232,7 @@ namespace SocalApp.Tests
             userRepository.GetById(followedId).Returns(new User { Id = followedId, Username = "followed", Email = "followed@example.com", PasswordHash = "hash2", Image = "img2.png" });
 
             // Act & Assert
-            Assert.DoesNotThrow(() => userService.UnfollowUser(followerId, followedId));
+            Assert.DoesNotThrow(() => userService.UnfollowUserById(followerId, followedId));
             userRepository.Received(1).Unfollow(followerId, followedId);
         }
 
@@ -249,7 +249,7 @@ namespace SocalApp.Tests
             userRepository.GetById(followedId).Returns(new User { Id = followedId, Username = "followed", Email = "followed@example.com", PasswordHash = "hash2", Image = "img2.png" });
 
             // Act & Assert
-            var ex = Assert.Throws<Exception>(() => userService.UnfollowUser(nonExistentFollowerId, followedId));
+            var ex = Assert.Throws<Exception>(() => userService.UnfollowUserById(nonExistentFollowerId, followedId));
             Assert.That(ex.Message, Is.EqualTo("User does not exist"));
             userRepository.DidNotReceive().Unfollow(Arg.Any<long>(), Arg.Any<long>());
         }
@@ -267,7 +267,7 @@ namespace SocalApp.Tests
             userRepository.GetById(nonExistentFollowedId).Returns((User)null);
 
             // Act & Assert
-            var ex = Assert.Throws<Exception>(() => userService.UnfollowUser(followerId, nonExistentFollowedId));
+            var ex = Assert.Throws<Exception>(() => userService.UnfollowUserById(followerId, nonExistentFollowedId));
             Assert.That(ex.Message, Is.EqualTo("User to unfollow does not exist"));
             userRepository.DidNotReceive().Unfollow(Arg.Any<long>(), Arg.Any<long>());
         }
@@ -290,7 +290,7 @@ namespace SocalApp.Tests
             userRepository.GetUserFollowing(userId).Returns(followingUsers);
 
             // Act
-            var result = userService.SearchUsers(userId, searchQuery);
+            var result = userService.SearchUsersById(userId, searchQuery);
 
             // Assert
             Assert.IsNotNull(result);
@@ -315,7 +315,7 @@ namespace SocalApp.Tests
             userRepository.GetUserFollowing(userId).Returns(followingUsers);
 
             // Act
-            var result = userService.SearchUsers(userId, searchQuery);
+            var result = userService.SearchUsersById(userId, searchQuery);
 
             // Assert
             Assert.IsNotNull(result);
@@ -339,7 +339,7 @@ namespace SocalApp.Tests
             userRepository.GetUserFollowing(userId).Returns(followingUsers);
 
             // Act
-            var result = userService.SearchUsers(userId, searchQuery);
+            var result = userService.SearchUsersById(userId, searchQuery);
 
             // Assert
             Assert.IsNotNull(result);

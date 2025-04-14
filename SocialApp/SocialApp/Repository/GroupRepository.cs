@@ -40,7 +40,7 @@ namespace SocialApp.Repository
         /// <returns>
         /// a list of all groups.
         /// </returns>
-        public List<Group> GetAll()
+        public List<Group> GetAllGroups()
         {
             List<Group> ans = new List<Group>();
             this.connection.Open();
@@ -147,7 +147,7 @@ namespace SocialApp.Repository
         /// <param name="id">
         /// the ID of the group to delete.
         /// </param>
-        public void DeleteById(long id)
+        public void DeleteGroupById(long id)
         {
             this.connection.Open();
 
@@ -164,7 +164,7 @@ namespace SocialApp.Repository
         /// </summary>
         /// <param name="id">The ID of the group to retrieve.</param>
         /// <returns>The group with the specified ID, or null if not found.</returns>
-        public Group GetById(long id)
+        public Group GetGroupsById(long id)
         {
             this.connection.Open();
             Group? group = null;
@@ -196,7 +196,7 @@ namespace SocialApp.Repository
         /// <param name="entity">
         /// the group entity to save.
         /// </param>
-        public void Save(Group entity)
+        public void SaveGroup(Group entity)
         {
             this.connection.Open();
 
@@ -238,7 +238,7 @@ namespace SocialApp.Repository
         /// <param name="adminId">
         /// the ID of the admin.
         /// </param>
-        public void UpdateById(long id, string name, string image, string description, long adminId)
+        public void UpdateGroupById(long id, string name, string image, string description, long adminId)
         {
             this.connection.Open();
 

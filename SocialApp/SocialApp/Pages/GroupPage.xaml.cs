@@ -64,7 +64,7 @@ namespace SocialApp.Pages
         {
             var controller = App.Services.GetService<AppController>();
             if (controller.CurrentUser == null) return false;
-            return groupRepository.GetById(GroupId).AdminId == controller.CurrentUser.Id;
+            return groupRepository.GetGroupsById(GroupId).AdminId == controller.CurrentUser.Id;
         }
 
         private async void SetContent()

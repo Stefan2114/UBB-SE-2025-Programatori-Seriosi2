@@ -36,7 +36,7 @@ namespace SocialApp.Services
         /// <param name="password">The password.</param>
         /// <param name="image">The image.</param>
         /// <exception cref="Exception">Thrown when validation fails.</exception>
-        public void ValidateAdd(string username, string email, string password, string image)
+        public void AddUser(string username, string email, string password, string image)
         {
             if (username == null || username.Length == 0)
             {
@@ -61,7 +61,7 @@ namespace SocialApp.Services
         /// </summary>
         /// <param name="id">The user ID.</param>
         /// <exception cref="Exception">Thrown when the user does not exist.</exception>
-        public void ValidateDelete(long id)
+        public void DeleteUser(long id)
         {
             if (this.userRepository.GetById(id) == null)
             {
@@ -80,7 +80,7 @@ namespace SocialApp.Services
         /// <param name="password">The password.</param>
         /// <param name="image">The image.</param>
         /// <exception cref="Exception">Thrown when the user does not exist.</exception>
-        public void ValidateUpdate(long id, string username, string email, string password, string? image)
+        public void UpdateUser(long id, string username, string email, string password, string? image)
         {
             if (this.userRepository.GetById(id) == null)
             {
@@ -94,7 +94,7 @@ namespace SocialApp.Services
         /// Gets all users.
         /// </summary>
         /// <returns>A list of users.</returns>
-        public List<User> GetAll()
+        public List<User> GetAllUsers()
         {
             return this.userRepository.GetAll();
         }
@@ -114,7 +114,7 @@ namespace SocialApp.Services
         /// </summary>
         /// <param name="id">The user ID.</param>
         /// <returns>A list of followers.</returns>
-        public List<User> GetUserFollowers(long id)
+        public List<User> GetUserFollowersFromId(long id)
         {
             return this.userRepository.GetUserFollowers(id);
         }
@@ -135,7 +135,7 @@ namespace SocialApp.Services
         /// <param name="userId">The user ID.</param>
         /// <param name="whoToFollowId">The ID of the user to follow.</param>
         /// <exception cref="Exception">Thrown when the user or the user to follow does not exist.</exception>
-        public void FollowUser(long userId, long whoToFollowId)
+        public void FollowUserById(long userId, long whoToFollowId)
         {
             if (this.userRepository.GetById(userId) == null)
             {
@@ -156,7 +156,7 @@ namespace SocialApp.Services
         /// <param name="userId">The user ID.</param>
         /// <param name="whoToUnfollowId">The ID of the user to unfollow.</param>
         /// <exception cref="Exception">Thrown when the user or the user to unfollow does not exist.</exception>
-        public void UnfollowUser(long userId, long whoToUnfollowId)
+        public void UnfollowUserById(long userId, long whoToUnfollowId)
         {
             if (this.userRepository.GetById(userId) == null)
             {
@@ -177,7 +177,7 @@ namespace SocialApp.Services
         /// <param name="userId">The user ID.</param>
         /// <param name="query">The search query.</param>
         /// <returns>A list of users matching the query.</returns>
-        public List<User> SearchUsers(long userId, string query)
+        public List<User> SearchUsersById(long userId, string query)
         {
             var followingUsers = this.GetUserFollowing(userId);
             return followingUsers.Where(u => u.Username.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
