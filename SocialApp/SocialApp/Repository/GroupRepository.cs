@@ -15,6 +15,7 @@ namespace SocialApp.Repository
     using SocialApp.Entities;
     using Group = SocialApp.Entities.Group;
 
+
     /// <summary>
     /// Repository class for managing Group entities.
     /// </summary>

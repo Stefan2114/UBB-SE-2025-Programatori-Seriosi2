@@ -12,8 +12,8 @@ namespace SocialApp.Repository
     public class ReactionRepository : IReactionRepository
     {
 
-        private string loginString = "Data Source=vm;" +
-    "Initial Catalog=team_babes;" +
+        private string loginString = "Data Source=DESKTOP-O4IR5P1\\SQLEXPRESS;" +
+    "Initial Catalog=ISSDB;" +
     "Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
         private SqlConnection connection;
 

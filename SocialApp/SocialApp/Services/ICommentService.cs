@@ -5,6 +5,7 @@ namespace SocialApp.Services
 {
     public interface ICommentService
     {
+
         List<Comment> GetAllComments();
         Comment GetCommentById(int commentId);
         List<Comment> GetCommentsByPostId(long postId);

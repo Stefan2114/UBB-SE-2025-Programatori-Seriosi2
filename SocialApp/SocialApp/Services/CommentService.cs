@@ -6,43 +6,81 @@ using System.Threading.Tasks;
 using SocialApp.Entities;
 using SocialApp.Repository;
 
+
 namespace SocialApp.Services
 {
+
+    /// <summary>
+    /// Service for managing comments.
+    /// </summary>
     public class CommentService : ICommentService
     {
-        ICommentRepository CommentRepository;
-        IPostRepository PostRepository;
-        IUserRepository UserRepository;
+        private readonly ICommentRepository commentRepository;
+        private readonly IPostRepository postRepository;
+        private readonly IUserRepository userRepository;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommentService"/> class.
+        /// </summary>
+        /// <param name="cr">The comment repository.</param>
+        /// <param name="pr">The post repository.</param>
+        /// <param name="userRepository">The user repository.</param>
         public CommentService(ICommentRepository cr, IPostRepository pr, IUserRepository userRepository)
         {
-            this.CommentRepository = cr;
-            this.PostRepository = pr;
-            this.UserRepository = userRepository;
+            this.commentRepository = cr;
+            this.postRepository = pr;    // Added null checks
+            this.userRepository = userRepository; // Added null checks
         }
-        public Comment ValidateAdd(string content, long userId, long postId)
+
+        /// <summary>
+        /// Validates and adds a new comment.
+        /// </summary>
+        /// <param name="content">The content of the comment.</param>
+        /// <param name="userId">The ID of the user adding the comment.</param>
+        /// <param name="postId">The ID of the post to which the comment is added.</param>
+        /// <returns>The created Comment object.</returns>
+        public Comment AddComment(string content, long userId, long postId)
         {
             if (content == null || content.Length == 0)
             {
-                throw new Exception("Comment content cannot be empty");
+                throw new ArgumentException("Comment content cannot be empty or null.", nameof(content));
             }
-            if (UserRepository.GetById(userId) == null)
+
+            if (this.userRepository.GetById(userId) == null)
             {
-                throw new Exception("User does not exist");
+                throw new InvalidOperationException($"User with ID {userId} does not exist.");
             }
+
             if (PostRepository.GetPostById(postId) == null)
             {
-                throw new Exception("Post does not exist");
+                throw new InvalidOperationException($"Post with ID {postId} does not exist.");
             }
-            Comment comment = new Comment() { Content = content, UserId = userId, PostId = postId, CreatedDate = DateTime.Now };
-            CommentRepository.SaveComment(comment);
+
+            Comment comment = new Comment
+            {
+                Content = content,
+                UserId = userId,
+                PostId = postId,
+                CreatedDate = DateTime.Now,
+            };
+
+            this.commentRepository.Save(comment);
+
             return comment;
         }
-        public void ValidateDelete(long commentId)
+
+        /// <summary>
+        /// Validates and deletes a comment by its ID.
+        /// </summary>
+        /// <param name="commentId">The ID of the comment to be deleted.</param>
+        /// <exception cref="InvalidOperationException">Thrown when the comment does not exist.</exception>
+        public void DeleteComment(long commentId)
         {
             if (CommentRepository.GetCommentById(commentId) == null)
             {
-                throw new Exception("Comment does not exist");
+                throw new InvalidOperationException($"Comment with ID {commentId} does not exist.");
             }
+
             CommentRepository.DeleteCommentById(commentId);
         }
 
@@ -64,6 +102,7 @@ namespace SocialApp.Services
             {
                 throw new Exception("Comment content cannot be empty");
             }
+
             this.CommentRepository.UpdateCommentContentById(commentId, content);
 
         }
