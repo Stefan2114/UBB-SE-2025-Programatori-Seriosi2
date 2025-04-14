@@ -1,26 +1,24 @@
 namespace SocialApp.Tests
 {
-    using System;
     using System.Collections.Generic;
+    using SocialApp;
     using NSubstitute;
-    using NUnit.Framework;
-    using SocialApp.Entities;
     using SocialApp.Repository;
     using SocialApp.Services;
+    using SocialApp.Entities;
 
-    [TestFixture]
+
     public class GroupServiceTests
     {
-        private IGroupRepository groupRepo;
-        private IUserRepository userRepo;
-        private GroupService service;
+        private readonly IGroupRepository groupRepository;
+        private readonly IUserRepository userRepository;
+        private readonly GroupService service;
 
-        [SetUp]
-        public void Setup()
+        public GroupServiceTests()
         {
-            this.groupRepo = Substitute.For<IGroupRepository>();
-            this.userRepo = Substitute.For<IUserRepository>();
-            this.service = new GroupService(this.groupRepo, this.userRepo);
+            this.groupRepository = Substitute.For<IGroupRepository>();
+            this.userRepository = Substitute.For<IUserRepository>();
+            this.service = new GroupService(this.groupRepository, this.userRepository);
         }
 
         private Group CreateTestGroup(long id = 1, long adminId = 1)
@@ -47,142 +45,202 @@ namespace SocialApp.Tests
             };
         }
 
-        #region ValidateAdd Tests
-
         [Test]
-        public void ValidateAdd_GroupNameIsEmpty_ThrowsArgumentException()
-        {
-            // Arrange
-            this.userRepo.GetById(1).Returns(CreateTestUser());
-
-            // Act & Assert
-            var ex = Assert.Throws<ArgumentException>(() =>
-                this.service.ValidateAdd("", "Valid desc", "img.jpg", 1));
-
-            Assert.That(ex.Message, Does.Contain("Group name cannot be empty"));
-            Assert.That(ex.ParamName, Is.EqualTo("groupName"));
-        }
-
-        [Test]
-        public void ValidateAdd_GroupNameIsWhitespace_ThrowsArgumentException()
-        {
-            // Arrange
-            this.userRepo.GetById(1).Returns(CreateTestUser());
-
-            // Act & Assert
-            var ex = Assert.Throws<ArgumentException>(() =>
-                this.service.ValidateAdd("   ", "Valid desc", "img.jpg", 1));
-
-            Assert.That(ex.Message, Does.Contain("Group name cannot be empty"));
-        }
-
-        [Test]
-        public void ValidateAdd_AdminUserDoesNotExist_ThrowsArgumentException()
-        {
-            // Arrange
-            this.userRepo.GetById(1).Returns((User)null);
-
-            // Act & Assert
-            var ex = Assert.Throws<ArgumentException>(() =>
-                this.service.ValidateAdd("Group", "Desc", "img.jpg", 1));
-
-            Assert.That(ex.Message, Does.Contain("User does not exist"));
-            Assert.That(ex.ParamName, Is.EqualTo("adminUserId"));
-        }
-
-        [Test]
-        public void ValidateAdd_ValidInput_SavesGroup()
+        public void addGroup_WithValidData_CreatesGroup()
         {
             // Arrange
             var adminId = 1L;
-            var groupName = "Group Name";
-            var description = "A description";
-            var image = "image.jpg";
+            var name = "New Group";
+            var desc = "A description";
+            var image = "group.jpg";
 
-            var expectedGroup = new Group
-            {
-                Name = groupName.Trim(),
-                Description = description?.Trim(),
-                Image = image,
-                AdminId = adminId
-            };
+            this.userRepository.GetById(adminId).Returns(this.CreateTestUser());
 
-            this.userRepo.GetById(adminId).Returns(CreateTestUser(adminId));
-            this.groupRepo.Save(Arg.Any<Group>()).Returns(expectedGroup);
+            // We don't need to test the result of SaveGroup directly here
+            // since it's not returning a value – but we will check the returned Group object
+            Group savedGroup = null;
+            this.groupRepository.When(x => x.SaveGroup(Arg.Do<Group>(g => savedGroup = g)));
 
             // Act
-            var result = this.service.ValidateAdd(groupName, description, image, adminId);
+            var result = this.service.addGroup(name, desc, image, adminId);
 
             // Assert
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result.Name, Is.EqualTo(expectedGroup.Name));
-            Assert.That(result.Description, Is.EqualTo(expectedGroup.Description));
-            Assert.That(result.Image, Is.EqualTo(expectedGroup.Image));
-            Assert.That(result.AdminId, Is.EqualTo(expectedGroup.AdminId));
-
-            this.groupRepo.Received(1).Save(Arg.Is<Group>(g =>
-                g.Name == groupName.Trim() &&
-                g.Description == description?.Trim() &&
-                g.Image == image &&
-                g.AdminId == adminId));
+            Assert.NotNull(result);
+            Assert.AreEqual(name, result.Name);
+            Assert.AreEqual(desc, result.Description);
+            Assert.AreEqual(image, result.Image);
+            Assert.AreEqual(adminId, result.AdminId);
         }
 
         [Test]
-        public void ValidateAdd_NullDescription_StillCreatesGroup()
+        public void addGroup_WithEmptyName_ThrowsException()
         {
             // Arrange
-            this.userRepo.GetById(1).Returns(CreateTestUser());
+            var adminId = 1L;
 
-            // Act
-            var result = this.service.ValidateAdd("Group", null, "img.jpg", 1);
-
-            // Assert
-            Assert.That(result.Description, Is.Null);
-        }
-
-        #endregion
-
-        #region ValidateDelete Tests
-
-        [Test]
-        public void ValidateDelete_InvalidGroupId_ThrowsArgumentException()
-        {
             // Act & Assert
-            var ex = Assert.Throws<ArgumentException>(() =>
-                this.service.ValidateDelete(0));
-
-            Assert.That(ex.Message, Does.Contain("Group ID must be a positive number"));
-            Assert.That(ex.ParamName, Is.EqualTo("groupId"));
+            var ex = Assert.Throws<Exception>(() =>
+                this.service.addGroup("", "desc", "img.jpg", adminId));
+            Assert.That(ex.Message, Is.EqualTo("Group name cannot be empty"));
         }
 
         [Test]
-        public void ValidateDelete_NonexistentGroup_ThrowsArgumentException()
+        public void addGroup_WithNonexistentAdmin_ThrowsException()
         {
             // Arrange
-            this.groupRepo.GetById(Arg.Any<long>()).Returns((Group)null);
+            this.userRepository.GetById(Arg.Any<long>()).Returns((User)null);
 
             // Act & Assert
-            var ex = Assert.Throws<ArgumentException>(() =>
-                this.service.ValidateDelete(999));
-
-            Assert.That(ex.Message, Does.Contain("Group with ID 999 does not exist"));
-            Assert.That(ex.ParamName, Is.EqualTo("groupId"));
+            var ex = Assert.Throws<Exception>(() =>
+                this.service.addGroup("Name", "Desc", "img.jpg", 999));
+            Assert.That(ex.Message, Is.EqualTo("User does not exist"));
         }
 
         [Test]
-        public void ValidateDelete_ExistingGroup_DeletesSuccessfully()
+        public void deleteGroup_WithExistingGroup_DeletesGroup()
         {
             // Arrange
             var groupId = 1L;
-            this.groupRepo.GetById(groupId).Returns(CreateTestGroup(groupId));
+            this.groupRepository.GetById(groupId).Returns(this.CreateTestGroup());
 
             // Act
-            this.service.ValidateDelete(groupId);
+            this.service.deleteGroup(groupId);
 
             // Assert
-            this.groupRepo.Received(1).DeleteById(groupId);
+            this.groupRepository.Received(1).DeleteById(groupId);
         }
 
-        #endregion
+        [Test]
+        public void deleteGroup_WithNonexistentGroup_ThrowsException()
+        {
+            // Arrange
+            this.groupRepository.GetById(Arg.Any<long>()).Returns((Group)null);
+
+            // Act & Assert
+            var ex = Assert.Throws<Exception>(() => this.service.deleteGroup(123));
+            Assert.That(ex.Message, Is.EqualTo("Group does not exist"));
+        }
+
+        [Test]
+        public void UpdateUser_WithValidData_UpdatesGroup()
+        {
+            // Arrange
+            var groupId = 1L;
+            var adminId = 1L;
+            this.groupRepository.GetById(groupId).Returns(this.CreateTestGroup());
+            this.userRepository.GetById(adminId).Returns(this.CreateTestUser());
+
+            // Act
+            this.service.UpdateUser(groupId, "New Name", "New Desc", "new.jpg", adminId);
+
+            // Assert
+            this.groupRepository.Received(1).UpdateById(groupId, "New Name", "new.jpg", "New Desc", adminId);
+        }
+
+        [Test]
+        public void UpdateUser_WithNonexistentGroup_ThrowsException()
+        {
+            // Arrange
+            this.groupRepository.GetById(Arg.Any<long>()).Returns((Group)null);
+
+            // Act & Assert
+            var exception = Assert.Throws<Exception>(() =>
+                this.service.UpdateUser(1, "Name", "Desc", "img.jpg", 1));
+            Assert.That(exception.Message, Is.EqualTo("Group does not exist"));
+        }
+
+        [Test]
+        public void UpdateUser_WithNonexistentAdmin_ThrowsException()
+        {
+            // Arrange
+            this.groupRepository.GetById(Arg.Any<long>()).Returns(this.CreateTestGroup());
+            this.userRepository.GetById(Arg.Any<long>()).Returns((User)null);
+
+            // Act & Assert
+            var exception = Assert.Throws<Exception>(() =>
+                this.service.UpdateUser(1, "Name", "Desc", "img.jpg", 1));
+            Assert.That(exception.Message, Is.EqualTo("User does not exist"));
+        }
+
+        [Test]
+        public void UpdateUser_WithEmptyName_ThrowsException()
+        {
+            // Arrange
+            this.groupRepository.GetById(Arg.Any<long>()).Returns(this.CreateTestGroup());
+            this.userRepository.GetById(Arg.Any<long>()).Returns(this.CreateTestUser());
+
+            // Act & Assert
+            var exception = Assert.Throws<Exception>(() =>
+                this.service.UpdateUser(1, " ", "Desc", "img.jpg", 1));
+            Assert.That(exception.Message, Is.EqualTo("Group name cannot be empty"));
+        }
+
+        [Test]
+        public void GetAll_ReturnsAllGroups()
+        {
+            // Arrange
+            var expectedGroups = new List<Group>
+            {
+                this.CreateTestGroup(1),
+                this.CreateTestGroup(2),
+            };
+            this.groupRepository.GetAll().Returns(expectedGroups);
+
+            // Act
+            var result = this.service.GetAll();
+
+            // Assert
+            Assert.That(result, Is.EqualTo(expectedGroups));
+        }
+
+        [Test]
+        public void GetById_ReturnsCorrectGroup()
+        {
+            // Arrange
+            var expectedGroup = this.CreateTestGroup();
+            this.groupRepository.GetById(1).Returns(expectedGroup);
+
+            // Act
+            var result = this.service.GetById(1);
+
+            // Assert
+            Assert.That(result, Is.EqualTo(expectedGroup));
+        }
+
+        [Test]
+        public void GetUsersFromGroup_ReturnsGroupMembers()
+        {
+            // Arrange
+            var expectedUsers = new List<User>
+            {
+                this.CreateTestUser(1),
+                this.CreateTestUser(2),
+            };
+            this.groupRepository.GetUsersFromGroup(1).Returns(expectedUsers);
+
+            // Act
+            var result = this.service.GetUsersFromGroup(1);
+
+            // Assert
+            Assert.That(result, Is.EqualTo(expectedUsers));
+        }
+
+        [Test]
+        public void GetGroupsForUser_ReturnsUserGroups()
+        {
+            // Arrange
+            var expectedGroups = new List<Group>
+            {
+                this.CreateTestGroup(1),
+                this.CreateTestGroup(2),
+            };
+            this.groupRepository.GetGroupsForUser(1).Returns(expectedGroups);
+
+            // Act
+            var result = this.service.GetGroupsForUser(1);
+
+            // Assert
+            Assert.That(result, Is.EqualTo(expectedGroups));
+        }
     }
 }

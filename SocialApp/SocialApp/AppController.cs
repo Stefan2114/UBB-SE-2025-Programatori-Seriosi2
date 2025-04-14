@@ -46,7 +46,7 @@ namespace SocialApp
         {
             UserRepository userRepository = new UserRepository();
             UserService userService = new UserService(userRepository);
-            userService.ValidateAdd(username, email, password, image);
+            userService.AddUser(username, email, password, image);
             Login(email, password);
         }
 

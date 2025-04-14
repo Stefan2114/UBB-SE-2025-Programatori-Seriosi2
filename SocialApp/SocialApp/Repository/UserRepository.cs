@@ -1,218 +1,211 @@
-﻿using Microsoft.Data.SqlClient;
-using SocialApp.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SocialApp.Repository
+﻿namespace SocialApp.Repository
 {
+    using System.Collections.Generic;
+    using Microsoft.Data.SqlClient;
+    using SocialApp.Entities;
+
     public class UserRepository : IUserRepository
     {
-        private string loginString = "Data Source=vm;" +
-    "Initial Catalog=team_babes;" +
-    "Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
-        private SqlConnection connection;
+        private const string ConnectionString = "Data Source=DESKTOP-O4IR5P1\\SQLEXPRESS;Initial Catalog=ISSDB;Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
+        private readonly SqlConnection connection;
 
-        public UserRepository()
-        {
-            this.connection = new SqlConnection(loginString);
-        }
+
+        public UserRepository() : this(ConnectionString) { }
 
         public UserRepository(string loginString)
         {
-            this.loginString = loginString;
             this.connection = new SqlConnection(loginString);
         }
 
         public List<User> GetAll()
         {
-            connection.Open();
-            List<User> users = new List<User>();
+            this.connection.Open();
+            var users = new List<User>();
 
-            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Users", connection);
-            SqlDataReader reader = selectCommand.ExecuteReader();
-            while (reader.Read())
+            using (var command = new SqlCommand("SELECT * FROM Users", this.connection))
+            using (var reader = command.ExecuteReader())
             {
-                User user = new User
+                while (reader.Read())
                 {
-                    Id = reader.GetInt64(reader.GetOrdinal("Id")),
-                    Username = reader.GetString(reader.GetOrdinal("Username")),
-                    Email = reader.GetString(reader.GetOrdinal("Email")),
-                    PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
-                    Image = reader.IsDBNull(reader.GetOrdinal("Image")) ? string.Empty : reader.GetString(reader.GetOrdinal("Image"))
-                };
-                users.Add(user);
+                    users.Add(this.CreateUserFromReader(reader));
+                }
             }
 
-            reader.Close();
-            connection.Close();
+            this.connection.Close();
             return users;
         }
 
-        public List<User> GetUserFollowers(long id)
+        public List<User> GetUserFollowers(long userId)
         {
-            connection.Open();
-            List<User> users = new List<User>();
-            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Users WHERE Id IN (SELECT FollowerId FROM UserFollowers WHERE UserId = @Id)", connection);
-            selectCommand.Parameters.AddWithValue("@Id", id);
-            SqlDataReader reader = selectCommand.ExecuteReader();
-            while (reader.Read())
+            this.connection.Open();
+            var followers = new List<User>();
+
+            using (var command = new SqlCommand(
+                "SELECT * FROM Users WHERE Id IN (SELECT FollowerId FROM UserFollowers WHERE UserId = @UserId)",
+                this.connection))
             {
-                User user = new User
+                command.Parameters.AddWithValue("@UserId", userId);
+                using (var reader = command.ExecuteReader())
                 {
-                    Id = reader.GetInt64(reader.GetOrdinal("Id")),
-                    Username = reader.GetString(reader.GetOrdinal("Username")),
-                    Email = reader.GetString(reader.GetOrdinal("Email")),
-                    PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
-                    Image = reader.IsDBNull(reader.GetOrdinal("Image")) ? string.Empty : reader.GetString(reader.GetOrdinal("Image"))
-                };
-                users.Add(user);
+                    while (reader.Read())
+                    {
+                        followers.Add(this.CreateUserFromReader(reader));
+                    }
+                }
             }
-            reader.Close();
-            connection.Close();
-            return users;
+
+            this.connection.Close();
+            return followers;
         }
-        public List<User> GetUserFollowing(long id)
+
+        public List<User> GetUserFollowing(long userId)
         {
-            connection.Open();
-            List<User> users = new List<User>();
-            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Users WHERE Id IN (SELECT UserId FROM UserFollowers WHERE FollowerId = @Id)", connection);
-            selectCommand.Parameters.AddWithValue("@Id", id);
-            SqlDataReader reader = selectCommand.ExecuteReader();
-            while (reader.Read())
+            this.connection.Open();
+            var following = new List<User>();
+
+            using (var command = new SqlCommand(
+                "SELECT * FROM Users WHERE Id IN (SELECT UserId FROM UserFollowers WHERE FollowerId = @UserId)",
+                this.connection))
             {
-                User user = new User
+                command.Parameters.AddWithValue("@UserId", userId);
+                using (var reader = command.ExecuteReader())
                 {
-                    Id = reader.GetInt64(reader.GetOrdinal("Id")),
-                    Username = reader.GetString(reader.GetOrdinal("Username")),
-                    Email = reader.GetString(reader.GetOrdinal("Email")),
-                    PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
-                    Image = reader.IsDBNull(reader.GetOrdinal("Image")) ? string.Empty : reader.GetString(reader.GetOrdinal("Image"))
-                };
-                users.Add(user);
+                    while (reader.Read())
+                    {
+                        following.Add(this.CreateUserFromReader(reader));
+                    }
+                }
             }
-            reader.Close();
-            connection.Close();
-            return users;
+
+            this.connection.Close();
+            return following;
         }
 
-
-        public void Follow(long userId, long whoToFollowId)
+        public void Follow(long followerId, long followeeId)
         {
-            connection.Open();
-            SqlCommand insertCommand = new SqlCommand("INSERT INTO UserFollowers (UserId, FollowerId) VALUES (@UserId, @FollowerId)", connection);
-            insertCommand.Parameters.AddWithValue("@UserId", whoToFollowId);
-            insertCommand.Parameters.AddWithValue("@FollowerId", userId);
-            insertCommand.ExecuteNonQuery();
-            connection.Close();
+            this.connection.Open();
+            using (var command = new SqlCommand(
+                "INSERT INTO UserFollowers (UserId, FollowerId) VALUES (@UserId, @FollowerId)",
+                this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", followeeId);
+                command.Parameters.AddWithValue("@FollowerId", followerId);
+                command.ExecuteNonQuery();
+            }
+            this.connection.Close();
         }
 
-        public void Unfollow(long userId, long whoToUnfollowId)
+        public void Unfollow(long followerId, long followeeId)
         {
-            connection.Open();
-            SqlCommand deleteCommand = new SqlCommand("DELETE FROM UserFollowers WHERE UserId = @UserId AND FollowerId = @FollowerId", connection);
-            deleteCommand.Parameters.AddWithValue("@UserId", whoToUnfollowId);
-            deleteCommand.Parameters.AddWithValue("@FollowerId", userId);
-            deleteCommand.ExecuteNonQuery();
-            connection.Close();
+            this.connection.Open();
+            using (var command = new SqlCommand(
+                "DELETE FROM UserFollowers WHERE UserId = @UserId AND FollowerId = @FollowerId",
+                this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", followeeId);
+                command.Parameters.AddWithValue("@FollowerId", followerId);
+                command.ExecuteNonQuery();
+            }
+
+            this.connection.Close();
         }
 
         public User GetByEmail(string email)
         {
-            connection.Open();
-            User user = null;
-            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Users WHERE Email = @Email", connection);
-            selectCommand.Parameters.AddWithValue("@Email", email);
-            SqlDataReader reader = selectCommand.ExecuteReader();
-            if (reader.Read())
+            this.connection.Open();
+            using (var command = new SqlCommand("SELECT * FROM Users WHERE Email = @Email", this.connection))
             {
-                user = new User
+                command.Parameters.AddWithValue("@Email", email);
+                using (var reader = command.ExecuteReader())
                 {
-                    Id = reader.GetInt64(reader.GetOrdinal("Id")),
-                    Username = reader.GetString(reader.GetOrdinal("Username")),
-                    Email = reader.GetString(reader.GetOrdinal("Email")),
-                    PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
-                    Image = reader.IsDBNull(reader.GetOrdinal("Image")) ? string.Empty : reader.GetString(reader.GetOrdinal("Image"))
-                };
-            }
-            reader.Close();
-            connection.Close();
-            return user;
-        }
-
-        public User GetById(long id)
-        {
-            connection.Open();
-            User user = null;
-
-            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Users WHERE Id = @Id", connection);
-            selectCommand.Parameters.AddWithValue("@Id", id);
-
-            SqlDataReader reader = selectCommand.ExecuteReader();
-            if (reader.Read())
-            {
-                user = new User
-                {
-                    Id = reader.GetInt64(reader.GetOrdinal("Id")),
-                    Username = reader.GetString(reader.GetOrdinal("Username")),
-                    Email = reader.GetString(reader.GetOrdinal("Email")),
-                    PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
-                    Image = reader.IsDBNull(reader.GetOrdinal("Image")) ? string.Empty : reader.GetString(reader.GetOrdinal("Image"))
-                };
+                    if (reader.Read())
+                    {
+                        return this.CreateUserFromReader(reader);
+                    }
+                }
             }
 
-            reader.Close();
-            connection.Close();
-            return user;
+            this.connection.Close();
+            return null;
         }
 
-        public void Save(User entity)
+        public User GetById(long userId)
         {
-            connection.Open();
+            this.connection.Open();
+            using (var command = new SqlCommand("SELECT * FROM Users WHERE Id = @UserId", this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", userId);
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return this.CreateUserFromReader(reader);
+                    }
+                }
+            }
 
-            SqlCommand insertCommand = new SqlCommand(
+            this.connection.Close();
+
+            return null;
+        }
+
+        public void Save(User user)
+        {
+            this.connection.Open();
+            using (var command = new SqlCommand(
                 "INSERT INTO Users (Username, Email, PasswordHash, Image) VALUES (@Username, @Email, @PasswordHash, @Image)",
-                connection
-            );
-            insertCommand.Parameters.AddWithValue("@Username", entity.Username);
-            insertCommand.Parameters.AddWithValue("@Email", entity.Email);
-            insertCommand.Parameters.AddWithValue("@PasswordHash", entity.PasswordHash);
-            insertCommand.Parameters.AddWithValue("@Image", entity.Image);
-            insertCommand.ExecuteNonQuery();
+                this.connection))
+            {
+                command.Parameters.AddWithValue("@Username", user.Username);
+                command.Parameters.AddWithValue("@Email", user.Email);
+                command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
+                command.Parameters.AddWithValue("@Image", user.Image);
+                command.ExecuteNonQuery();
+            }
 
-            connection.Close();
+            this.connection.Close();
         }
 
-        public void UpdateById(long id, string username, string email, string passwordHash, string? image)
+        public void UpdateById(long userId, string username, string email, string passwordHash, string image)
         {
-            connection.Open();
+            this.connection.Open();
+            using (var command = new SqlCommand(
+                "UPDATE Users SET Username = @Username, Email = @Email, PasswordHash = @PasswordHash, Image = @Image WHERE Id = @UserId",
+                this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", userId);
+                command.Parameters.AddWithValue("@Username", username);
+                command.Parameters.AddWithValue("@Email", email);
+                command.Parameters.AddWithValue("@PasswordHash", passwordHash);
+                command.Parameters.AddWithValue("@Image", image);
+                command.ExecuteNonQuery();
+            }
 
-            SqlCommand updateCommand = new SqlCommand(
-                "UPDATE Users SET Username = @Username, Email = @Email, PasswordHash = @PasswordHash, Image=@Image WHERE Id = @Id",
-                connection
-            );
-
-            updateCommand.Parameters.AddWithValue("@Id", id);
-            updateCommand.Parameters.AddWithValue("@Username", username);
-            updateCommand.Parameters.AddWithValue("@Email", email);
-            updateCommand.Parameters.AddWithValue("@PasswordHash", passwordHash);
-            updateCommand.Parameters.AddWithValue("@Image", image);
-            updateCommand.ExecuteNonQuery();
-
-            connection.Close();
+            this.connection.Close();
         }
 
-        public void DeleteById(long id)
+        public void DeleteById(long userId)
         {
-            connection.Open();
+            this.connection.Open();
+            using (var command = new SqlCommand("DELETE FROM Users WHERE Id = @UserId", this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", userId);
+                command.ExecuteNonQuery();
+            }
 
-            SqlCommand deleteCommand = new SqlCommand("DELETE FROM Users WHERE Id = @Id", connection);
-            deleteCommand.Parameters.AddWithValue("@Id", id);
-            deleteCommand.ExecuteNonQuery();
+            this.connection.Close();
+        }
 
-            connection.Close();
+        private User CreateUserFromReader(SqlDataReader reader)
+        {
+            return new User
+            {
+                Id = reader.GetInt64(reader.GetOrdinal("Id")),
+                Username = reader.GetString(reader.GetOrdinal("Username")),
+                Email = reader.GetString(reader.GetOrdinal("Email")),
+                PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
+                Image = reader.IsDBNull(reader.GetOrdinal("Image")) ? string.Empty : reader.GetString(reader.GetOrdinal("Image"))
+            };
         }
     }
 }

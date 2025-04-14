@@ -1,143 +1,86 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.UI.Xaml.Controls;
-using SocialApp.Entities;
-using SocialApp.Repository;
-
-namespace SocialApp.Services
+﻿namespace SocialApp.Services
 {
+
+    using System;
+    using System.Collections.Generic;
+    using SocialApp.Entities;
+    using SocialApp.Repository;
+
     public class GroupService : IGroupService
     {
-        private readonly IGroupRepository groupRepository;
-        private readonly IUserRepository userRepository;
+        private IGroupRepository groupRepository;
+        private IUserRepository userRepository;
 
         public GroupService(IGroupRepository groupRepository, IUserRepository userRepository)
         {
-            this.groupRepository = groupRepository ?? throw new ArgumentNullException(nameof(groupRepository));
-            this.userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            this.groupRepository = groupRepository;
+            this.userRepository = userRepository;
         }
 
-        public Group ValidateAdd(string groupName, string groupDescription, string groupImage, long adminUserId)
+        public Group addGroup(string name, string desc, string image, long adminId)
         {
-            if (string.IsNullOrWhiteSpace(groupName))
+            if (name == null || name.Length == 0)
             {
-                throw new ArgumentException("Group name cannot be empty", nameof(groupName));
+                throw new Exception("Group name cannot be empty");
             }
 
-            if (userRepository.GetById(adminUserId) == null)
+            if (userRepository.GetById(adminId) == null)
             {
-                throw new ArgumentException("User does not exist", nameof(adminUserId));
+                throw new Exception("User does not exist");
             }
 
-            var newGroup = new Group
-            {
-                Name = groupName.Trim(),
-                Description = groupDescription?.Trim(),
-                Image = groupImage,
-                AdminId = adminUserId
-            };
+            Group group = new Group() { Name = name, AdminId = adminId, Image = image, Description = desc };
 
-            groupRepository.Save(newGroup);
-            return newGroup;
+            GroupRepository.SaveGroup(group);
+            return group;
         }
 
-        public void ValidateDelete(long groupId)
+        public void deleteGroup(long groupId)
         {
-            if (groupId <= 0)
-            {
-                throw new ArgumentException("Group ID must be a positive number", nameof(groupId));
-            }
+            if (this.groupRepository.GetById(groupId) == null)
+                throw new Exception("Group does not exist");
 
-            var group = groupRepository.GetById(groupId);
-            if (group == null)
-            {
-                throw new ArgumentException($"Group with ID {groupId} does not exist", nameof(groupId));
-            }
-
-            groupRepository.DeleteById(groupId);
+            this.groupRepository.DeleteById(groupId);
         }
 
-        public void ValidateUpdate(long groupId, string groupName, string groupDescription, string groupImage, long adminUserId)
+        public void UpdateUser(long id, string name, string desc, string image, long adminId)
         {
-            if (groupId <= 0)
+            if (this.groupRepository.GetById(id) == null)
             {
-                throw new ArgumentException("Group ID must be a positive number", nameof(groupId));
+                throw new Exception("Group does not exist");
             }
 
-            if (adminUserId <= 0)
+            if (this.userRepository.GetById(adminId) == null)
             {
-                throw new ArgumentException("Admin user ID must be a positive number", nameof(adminUserId));
+                throw new Exception("User does not exist");
             }
 
-            var group = groupRepository.GetById(groupId);
-            if (group == null)
+            if (name == null || name.Length == 0)
             {
-                throw new ArgumentException($"Group with ID {groupId} does not exist", nameof(groupId));
+                throw new Exception("Group name cannot be empty");
             }
 
-            var adminUser = userRepository.GetById(adminUserId);
-            if (adminUser == null)
-            {
-                throw new ArgumentException($"User with ID {adminUserId} does not exist", nameof(adminUserId));
-            }
-
-            if (string.IsNullOrWhiteSpace(groupName))
-            {
-                throw new ArgumentException("Group name cannot be empty or whitespace", nameof(groupName));
-            }
-
-            groupRepository.UpdateById(groupId, groupName.Trim(), groupImage, groupDescription?.Trim(), adminUserId);
+            this.groupRepository.UpdateById(id, name, image, desc, adminId);
         }
 
         public List<Group> GetAll()
         {
-            var groups = groupRepository.GetAll();
-            return groups ?? new List<Group>();
+            return this.groupRepository.GetAll();
         }
 
-        public Group GetById(long groupId)
+        public Group GetById(long id)
         {
-            if (groupId <= 0)
-            {
-                throw new ArgumentException("Group ID must be a positive number", nameof(groupId));
-            }
-
-            var requestedGroup = groupRepository.GetById(groupId);
-            if (requestedGroup == null)
-            {
-                throw new ArgumentException($"Group with ID {groupId} does not exist", nameof(groupId));
-            }
-            return requestedGroup;
+            return this.groupRepository.GetById(id);
         }
 
         public List<User> GetUsersFromGroup(long groupId)
         {
-            if (groupId <= 0)
-            {
-                throw new ArgumentException("Group ID must be a positive number", nameof(groupId));
-            }
-
-            var group = groupRepository.GetById(groupId);
-            if (group == null)
-            {
-                throw new ArgumentException($"Group with ID {groupId} does not exist", nameof(groupId));
-            }
-
-            var users = groupRepository.GetUsersFromGroup(groupId);
-            return users ?? new List<User>();
+            return this.groupRepository.GetUsersFromGroup(groupId);
         }
 
         public List<Group> GetGroupsForUser(long userId)
         {
-            if (userRepository.GetById(userId) == null)
-            {
-                throw new ArgumentException("User does not exist", nameof(userId));
-            }
-
-            return groupRepository.GetGroupsForUser(userId);
+            return this.groupRepository.GetGroupsForUser(userId);
         }
     }
 }

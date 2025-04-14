@@ -112,7 +112,7 @@
 
                 <!-- Upload Image Button -->
                 <Button 
-                    x:Name="UploadImgButton"
+                    x:Name="UploadImageButton"
                     Content="Upload Image" 
                     Background="#D9D9D9" 
                     Foreground="#222831" 
@@ -123,7 +123,7 @@
 
                 <!-- Remove Image Button -->
                 <Button 
-                    x:Name="RemoveImgButton"
+                    x:Name="RemoveImageButton"
                     Content="Remove Image" 
                     Background="#D9D9D9" 
                     Foreground="#222831" 

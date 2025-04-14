@@ -32,10 +32,14 @@ namespace SocialApp.Pages
     /// </summary>
     public sealed partial class CreateGroup : Page
     {
-        private AppController _controller;
-        private GroupService _groupService;
-        private UserService _userService;
+        private AppController controller;
+        private GroupService groupService;
+        private UserService userService;
         private string image = string.Empty;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreateGroup"/> class.
+        /// </summary>
         public CreateGroup()
         {
             InitializeComponent();
@@ -43,35 +47,68 @@ namespace SocialApp.Pages
             GroupNameInput.TextChanged += GroupNameInput_TextChanged;
         }
 
+        /// <summary>
+        /// Initializes the services required for group and user management.
+        /// </summary>
         private void InitializeServices()
         {
             var groupRepository = new GroupRepository();
             var userRepository = new UserRepository();
-            _groupService = new GroupService(groupRepository, userRepository);
-            _userService = new UserService(userRepository);
-            _controller = App.Services.GetService<AppController>();
+            groupService = new GroupService(groupRepository, userRepository);
+            userService = new UserService(userRepository);
+            controller = App.Services.GetService<AppController>();
         }
 
+        /// <summary>
+        /// This method is called when the page is navigated to. It sets the frame for the top bar.
+        /// </summary>
+        /// <param name="e">The event data that provides information about the navigation.</param>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             TopBar.SetFrame(Frame);
         }
 
+        /// <summary>
+        /// Handles the TextChanged event for the GroupNameInput field.
+        /// Updates the character counter to reflect the current length of the group name input.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the GroupNameInput control.</param>
+        /// <param name="e">The event data that provides information about the TextChanged event.</param>
         private void GroupNameInput_TextChanged(object sender, TextChangedEventArgs e)
         {
             GroupNameCharCounter.Text = $"{GroupNameInput.Text.Length}/55";
         }
 
+
+        /// <summary>
+        /// Handles the TextChanged event for the GroupDescriptionInput field.
+        /// Updates the character counter to reflect the current length of the group description input.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the GroupDescriptionInput control.</param>
+        /// <param name="e">The event data that provides information about the TextChanged event.</param>
         private void GroupDescriptionInput_TextChanged(object sender, TextChangedEventArgs e)
         {
             GroupDescriptionCharCounter.Text = $"{GroupDescriptionInput.Text.Length}/250";
         }
 
+        /// <summary>
+        /// Handles the click event for the Cancel button.
+        /// Navigates back to the previous page in the frame.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the Cancel button control.</param>
+        /// <param name="e">The event data that provides information about the click event.</param>
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             Frame.GoBack();
         }
 
+        /// <summary>
+        /// Handles the click event for the Create Group button.
+        /// Validates the input fields and creates a new group if valid.
+        /// Navigates to the UserPage upon successful creation.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the Create Group button control.</param>
+        /// <param name="e">The event data that provides information about the click event.</param>
         private void CreateGroupButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -82,12 +119,12 @@ namespace SocialApp.Pages
                 {
                     Name = GroupNameInput.Text.Trim(),
                     Description = string.IsNullOrWhiteSpace(GroupDescriptionInput.Text) ? null : GroupDescriptionInput.Text.Trim(),
-                    AdminId = _controller.CurrentUser.Id,
+                    AdminId = controller.CurrentUser.Id,
                     Image = image
                 };
 
-                _groupService.ValidateAdd(newGroup.Name, newGroup.Description ?? "", newGroup.Image ?? "", newGroup.AdminId);
-                Frame.Navigate(typeof(UserPage), _controller);
+                groupService.ValidateAdd(newGroup.Name, newGroup.Description ?? "", newGroup.Image ?? "", newGroup.AdminId);
+                Frame.Navigate(typeof(UserPage), controller);
             }
             catch (Exception ex)
             {
@@ -95,6 +132,11 @@ namespace SocialApp.Pages
             }
         }
 
+        /// <summary>
+        /// Validates the input fields for creating a new group.
+        /// Throws an exception if any validation rule is violated.
+        /// </summary>
+        /// <exception cref="Exception">Thrown when the group name is empty, exceeds 55 characters, or when the group description exceeds 250 characters.</exception>
         private void ValidateInputs()
         {
             if (string.IsNullOrWhiteSpace(GroupNameInput.Text))
@@ -107,13 +149,27 @@ namespace SocialApp.Pages
                 throw new Exception("Group description cannot exceed 250 characters!");
         }
 
+        /// <summary>
+        /// Displays an error message to the user.
+        /// This method sets the text of the ErrorMessage control to the provided message
+        /// and makes the ErrorMessage control visible. It is typically used to inform
+        /// the user of validation errors or other issues that need attention.
+        /// </summary>
+        /// <param name="message">The error message to be displayed.</param>
         private void ShowError(string message)
         {
             ErrorMessage.Text = message;
             ErrorMessage.Visibility = Visibility.Visible;
         }
 
-        // User Search functionality
+        /// <summary>
+        /// Handles the TextChanged event for the UserSearchBox field.
+        /// Filters the list of users based on the current input in the search box.
+        /// If the input is empty, it hides the search results.
+        /// Otherwise, it displays the users that match the search query.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the UserSearchBox control.</param>
+        /// <param name="e">The event data that provides information about the TextChanged event.</param>
         private void UserSearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var query = UserSearchBox.Text;
@@ -126,7 +182,7 @@ namespace SocialApp.Pages
             else
             {
                 // Show filtered results
-                var users = _userService.GetUserFollowing(_controller.CurrentUser.Id)
+                var users = userService.GetUserFollowing(controller.CurrentUser.Id)
                                         .Where(u => u.Username.Contains(query))
                                         .ToList();
                 UserSearchResults.ItemsSource = users;
@@ -139,7 +195,13 @@ namespace SocialApp.Pages
 
 
 
-        // Handle selection of a user
+        /// <summary>
+        /// Handles the selection change event for the UserSearchResults list.
+        /// This method is triggered when the user selects a user from the search results.
+        /// It adds the selected user to the selected users list for the group creation process.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the UserSearchResults control.</param>
+        /// <param name="e">The event data that provides information about the selection change.</param>
         private void UserSearchResults_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (UserSearchResults.SelectedItem is User selectedUser)
@@ -148,7 +210,12 @@ namespace SocialApp.Pages
             }
         }
 
-        // Add user to the selected list (small version only)
+        /// <summary>
+        /// Adds a user to the selected users list for group creation.
+        /// This method creates a button representing the selected user,
+        /// which can be clicked to remove the user from the selection.
+        /// </summary>
+        /// <param name="user">The user to be added to the selected users list.</param>
         private void AddUserToSelectedList(User user)
         {
             // Create small version with an "X"
@@ -165,12 +232,31 @@ namespace SocialApp.Pages
             SelectedUsersPanel.Children.Add(smallUserButton);
         }
 
+        /// <summary>
+        /// Handles the Tapped event for the UserSearchBox control.
+        /// This method is triggered when the user taps inside the search box.
+        /// It makes the search results visible, allowing the user to see potential matches
+        /// for their input. This enhances the user experience by providing immediate feedback
+        /// on available users to add to the group.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the UserSearchBox control.</param>
+        /// <param name="e">The event data that provides information about the Tapped event.</param>
+        /// Note: This method does not seem to be necessary in the current context,
         private void UserSearchBox_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             // Show the search results when the user taps inside the search box.
             UserSearchResults.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Handles the Tapped event for the UserSearchResults control.
+        /// This method is triggered when the user taps on a user from the search results.
+        /// It adds the selected user to the selected users list for the group creation process.
+        /// Optionally, it can hide the search results after selection.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the UserSearchResults control.</param>
+        /// <param name="e">The event data that provides information about the Tapped event.</param>
+        /// Note: This method does not seem to be necessary in the current context,
         private void UserSearchResults_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             // Allow users to select a user from the list, without hiding the dropdown immediately.
@@ -180,7 +266,13 @@ namespace SocialApp.Pages
             UserSearchResults.Visibility = Visibility.Collapsed;
         }
 
-        // Remove user from the selected list (only small version)
+        /// <summary>
+        /// Removes a user from the selected users list for group creation.
+        /// This method searches for the button representing the specified user
+        /// in the SelectedUsersPanel and removes it if found. This allows the user
+        /// to deselect a user that was previously added to the group.
+        /// </summary>
+        /// <param name="user">The user to be removed from the selected users list.</param>
         private void RemoveUserFromSelectedList(User user)
         {
             var smallUserButton = SelectedUsersPanel.Children
@@ -193,6 +285,14 @@ namespace SocialApp.Pages
             }
         }
 
+        /// <summary>
+        /// Handles the click event for the Add Image button.
+        /// This method opens a file picker dialog to allow the user to select an image file.
+        /// If a file is selected, it encodes the image to a Base64 string and stores it in the 'image' variable.
+        /// If an error occurs during the process, it displays an error message in the ErrorTextBox.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the Add Image button control.</param>
+        /// <param name="e">The event data that provides information about the click event.</param>
         private async void AddImageButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -221,6 +321,13 @@ namespace SocialApp.Pages
             }
         }
 
+        /// <summary>
+        /// Handles the click event for the Remove Image button.
+        /// This method clears the currently selected image by setting the 'image' variable to an empty string.
+        /// It allows the user to remove an image that was previously selected for the group.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the Remove Image button control.</param>
+        /// <param name="e">The event data that provides information about the click event.</param>
         private void RemoveImageButton_Click(object sender, RoutedEventArgs e)
         {
             image = string.Empty;
