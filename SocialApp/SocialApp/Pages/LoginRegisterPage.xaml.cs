@@ -1,9 +1,14 @@
-// <copyright file="LoginRegisterPage.xaml.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace SocialApp.Pages
-{
+using SocialApp.Services;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using Windows.Storage.Streams;
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.UI.Xaml.Navigation;
     using System;
     using System.Threading.Tasks;
     using global::Windows.Storage;
@@ -16,25 +21,25 @@ namespace SocialApp.Pages
     using Microsoft.UI.Xaml.Navigation;
     using SocialApp.Services;
 
-    /// <summary>
-    /// Represents the login and registration page of the application.
-    /// </summary>
+namespace SocialApp.Pages
+{
+   
+
     public sealed partial class LoginRegisterPage : Page
     {
-        private const Visibility Collapsed = Visibility.Collapsed;
-        private const Visibility Visible = Visibility.Visible;
-        private AppController controller;
-        private string image;
+        private const Visibility CollapsedVisibility = Visibility.Collapsed;
+        private const Visibility VisibleVisibility = Visibility.Visible;
+        private AppController appController;
+        private string profileImage;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginRegisterPage"/> class.
         /// </summary>
         public LoginRegisterPage()
         {
-            this.InitializeComponent();
-            this.controller = App.Services.GetService<AppController>() ?? throw new InvalidOperationException("AppController service not found.");
-            this.image = string.Empty;
-            this.InitialFlow();
+            InitializeComponent();
+            this.InitializePageFlow();
+
         }
 
         /// <summary>
@@ -69,67 +74,88 @@ namespace SocialApp.Pages
         /// </exception>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            this.controller = App.Services.GetService<AppController>() ?? throw new InvalidOperationException("AppController service not found.");
+            this.appController = App.Services.GetService<AppController>();
+
         }
 
-        private void InitialFlow()
+        private void InitializePageFlow()
         {
-            this.SetInitialVisibilities();
-            this.SetInitialContent();
-            this.SetInitialHandlers();
+            this.SetInitialVisibilityStates();
+            this.SetInitialContentValues();
+            this.SetInitialEventHandlers();
+
         }
 
-        private void SetInitialVisibilities()
+        private void SetInitialVisibilityStates()
         {
-            this.EmailTextbox.Visibility = Visible;
-            this.UsernameTextbox.Visibility = Collapsed;
-            this.PasswordTextbox.Visibility = Collapsed;
-            this.ConfirmPasswordTextbox.Visibility = Collapsed;
-            this.UploadedImage.Visibility = Collapsed;
-            this.UploadImgButton.Visibility = Collapsed;
-            this.RemoveImgButton.Visibility = Collapsed;
-            this.CheckBox.Visibility = Collapsed;
-            this.ContinueButton.Visibility = Visible;
+            EmailTextbox.Visibility = VisibleVisibility;
+            UsernameTextbox.Visibility = CollapsedVisibility;
+            PasswordTextbox.Visibility = CollapsedVisibility;
+            ConfirmPasswordTextbox.Visibility = CollapsedVisibility;
+            UploadedImage.Visibility = CollapsedVisibility;
+            UploadImageButton.Visibility = CollapsedVisibility;
+            RemoveImageButton.Visibility = CollapsedVisibility;
+            CheckBox.Visibility = CollapsedVisibility;
+            ContinueButton.Visibility = VisibleVisibility;
+
         }
 
-        private void SetInitialContent()
+        private void SetInitialContentValues()
         {
             this.PageName.Text = "Login/Register";
             this.ContinueButton.Content = "Continue";
         }
 
-        private void SetInitialHandlers()
+        private void SetInitialEventHandlers()
         {
-            this.ContinueButton.Click += this.ContinueClick;
+            ContinueButton.Click += OnContinueClicked;
         }
 
-        private void LoginFlow()
+        public void OnContinueClicked(object sender, RoutedEventArgs e)
         {
-            this.SetLoginVisibilities();
-            this.SetLoginContent();
-            this.SetLoginHandlers();
+            if (this.appController.EmailExists(EmailTextbox.Text))
+            {
+                this.InitializeLoginFlow();
+            }
+            else
+            {
+                this.InitializeRegistrationFlow();
+            }
+
         }
 
-        private void SetLoginVisibilities()
+        private void InitializeLoginFlow()
         {
-            this.PasswordTextbox.Visibility = Visible;
+            this.SetLoginVisibilityStates();
+            this.SetLoginContentValues();
+            this.SetLoginEventHandlers();
+
         }
 
-        private void SetLoginContent()
+        private void SetLoginVisibilityStates()
         {
+            this.PasswordTextbox.Visibility = VisibleVisibility;
+
+        }
+
+        private void SetLoginContentValues()
+        {
+
             this.PageName.Text = "Login";
             this.ContinueButton.Content = "Login";
             this.ErrorTextbox.Text = string.Empty;
         }
 
-        private void SetLoginHandlers()
+        private void SetLoginEventHandlers()
         {
-            this.ContinueButton.Click -= this.ContinueClick;
-            this.ContinueButton.Click += this.LoginClick;
+            ContinueButton.Click -= OnContinueClicked;
+            ContinueButton.Click += OnLoginClicked;
+
         }
 
-        private void LoginClick(object sender, RoutedEventArgs e)
+        private void OnLoginClicked(object sender, RoutedEventArgs e)
         {
+
             if (!this.controller.Login(this.EmailTextbox.Text, this.PasswordTextbox.Password)) // Use Password property
             {
                 this.ErrorTextbox.Visibility = Visible;
@@ -142,26 +168,29 @@ namespace SocialApp.Pages
             }
         }
 
-        private void RegisterFlow()
+        private void InitializeRegistrationFlow()
         {
-            this.SetRegisterVisibilities();
-            this.SetRegisterContent();
-            this.SetRegisterHandlers();
+            this.SetRegistrationVisibilityStates();
+            this.SetRegistrationContentValues();
+            this.SetRegistrationEventHandlers();
+
         }
 
-        private void SetRegisterVisibilities()
+        private void SetRegistrationVisibilityStates()
         {
-            this.PasswordTextbox.Visibility = Visible;
-            this.UsernameTextbox.Visibility = Visible;
-            this.ConfirmPasswordTextbox.Visibility = Visible;
-            this.UploadedImage.Visibility = Visible;
-            this.UploadImgButton.Visibility = Visible;
-            this.RemoveImgButton.Visibility = Visible;
-            this.CheckBox.Visibility = Visible;
+            PasswordTextbox.Visibility = VisibleVisibility;
+            UsernameTextbox.Visibility = VisibleVisibility;
+            ConfirmPasswordTextbox.Visibility = VisibleVisibility;
+            UploadedImage.Visibility = VisibleVisibility;
+            UploadImageButton.Visibility = VisibleVisibility;
+            RemoveImageButton.Visibility = VisibleVisibility;
+            CheckBox.Visibility = VisibleVisibility;
+
         }
 
-        private void SetRegisterContent()
+        private void SetRegistrationContentValues()
         {
+
             this.PageName.Text = "Register";
             this.ContinueButton.Content = "Register";
             this.ErrorTextbox.Text = string.Empty;
@@ -169,74 +198,80 @@ namespace SocialApp.Pages
             {
                 Source = new BitmapImage(new Uri("ms-appx:///Assets/User.png")),
             };
-            this.image = string.Empty;
+            this.profileImage = string.Empty;
+
         }
 
-        private void SetRegisterHandlers()
+        private void SetRegistrationEventHandlers()
         {
-            this.ContinueButton.Click -= this.ContinueClick;
-            this.ContinueButton.Click += this.RegisterClick;
+            ContinueButton.Click -= OnContinueClicked;
+            ContinueButton.Click += OnRegisterClicked;
         }
 
-        private async void UploadImage(object sender, RoutedEventArgs e)
+        private async void OnImageUpload(object sender, RoutedEventArgs e)
         {
             try
             {
-                var picker = new FileOpenPicker
+                var filePicker = new FileOpenPicker
                 {
                     ViewMode = PickerViewMode.Thumbnail,
                     SuggestedStartLocation = PickerLocationId.PicturesLibrary,
                 };
-                picker.FileTypeFilter.Add(".jpg");
-                picker.FileTypeFilter.Add(".jpeg");
-                picker.FileTypeFilter.Add(".png");
+                filePicker.FileTypeFilter.Add(".jpg");
+                filePicker.FileTypeFilter.Add(".jpeg");
+                filePicker.FileTypeFilter.Add(".png");
 
-                var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.CurrentWindow);
-                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+                var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(App.CurrentWindow);
+                WinRT.Interop.InitializeWithWindow.Initialize(filePicker, windowHandle);
 
-                StorageFile file = await picker.PickSingleFileAsync();
-                if (file != null)
+                StorageFile selectedFile = await filePicker.PickSingleFileAsync();
+                if (selectedFile != null)
                 {
-                    this.image = await AppController.EncodeImageToBase64Async(file);
+                    this.profileImage = await AppController.EncodeImageToBase64Async(selectedFile);
+
                     var bitmapImage = new BitmapImage();
-                    using (IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read))
+                    using (IRandomAccessStream fileStream = await selectedFile.OpenAsync(FileAccessMode.Read))
                     {
-                        await bitmapImage.SetSourceAsync(stream);
+                        await bitmapImage.SetSourceAsync(fileStream);
                     }
 
                     this.UploadedImage.Child = new Image { Source = bitmapImage };
                 }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                this.ErrorTextbox.Text = $"Error uploading image: {ex.Message}";
+                ErrorTextbox.Text = $"Error uploading image: {exception.Message}";
+
             }
         }
 
-        private void RemoveImage(object sender, RoutedEventArgs e)
+        private void OnImageRemoval(object sender, RoutedEventArgs e)
         {
-            this.image = string.Empty;
-            this.UploadedImage.Child = new Image
+            this.profileImage = string.Empty;
+            UploadedImage.Child = new Image
+
             {
                 Source = new BitmapImage(new Uri("ms-appx:///Assets/User.png")),
             };
         }
 
-        private void RegisterClick(object sender, RoutedEventArgs e)
+        private void OnRegisterClicked(object sender, RoutedEventArgs e)
         {
             try
             {
+
                 this.PasswordsMatch(this.PasswordTextbox.Password, this.ConfirmPasswordTextbox.Password); // Use Password property
                 this.AreTermAccepted();
                 this.Register();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                this.ErrorTextbox.Text = ex.Message;
+                ErrorTextbox.Text = exception.Message;
+
             }
         }
 
-        private void PasswordsMatch(string password, string confirmedPassword)
+        private static void ValidatePasswordMatch(string password, string confirmedPassword)
         {
             if (password != confirmedPassword)
             {
@@ -244,7 +279,7 @@ namespace SocialApp.Pages
             }
         }
 
-        private void AreTermAccepted()
+        private void ValidateTermsAcceptance()
         {
             if (this.CheckBox.IsChecked == null || this.CheckBox.IsChecked == false)
             {
@@ -252,16 +287,18 @@ namespace SocialApp.Pages
             }
         }
 
-        private void Register()
+        private void CompleteRegistration()
         {
             try
             {
+
                 this.controller.Register(this.UsernameTextbox.Text, this.EmailTextbox.Text, this.PasswordTextbox.Password, this.image); // Use Password property
                 this.Frame.Navigate(typeof(HomeScreen), this.controller);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                this.ErrorTextbox.Text = ex.Message;
+                ErrorTextbox.Text = exception.Message;
+
             }
         }
     }
