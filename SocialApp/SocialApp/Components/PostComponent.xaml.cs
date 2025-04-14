@@ -128,7 +128,7 @@ namespace SocialApp.Components
 
         private void LoadComments()
         {
-            var comments = commentService.GetCommentForPost(postId);
+            var comments = commentService.GetCommentsByPostId(postId);
             CommentsListView.ItemsSource = comments;
         }
 
@@ -182,7 +182,7 @@ namespace SocialApp.Components
             string commentText = CommentTextBox.Text;
             if (!string.IsNullOrEmpty(commentText))
             {
-                commentService.ValidateAdd(commentText, userId, postId);
+                commentService.AddComment(commentText, userId, postId);
                 CommentTextBox.Text = string.Empty;
                 CommentSection.Visibility = Visibility.Collapsed;
             }

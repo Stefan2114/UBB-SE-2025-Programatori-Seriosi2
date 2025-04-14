@@ -6,49 +6,95 @@ using System.Threading.Tasks;
 using SocialApp.Entities;
 using SocialApp.Repository;
 
+
 namespace SocialApp.Services
 {
-    class CommentService : ICommentService
+
+    /// <summary>
+    /// Service for managing comments.
+    /// </summary>
+    public class CommentService : ICommentService
     {
-        ICommentRepository CommentRepository;
-        IPostRepository PostRepository;
-        IUserRepository UserRepository;
+        private readonly ICommentRepository commentRepository;
+        private readonly IPostRepository postRepository;
+        private readonly IUserRepository userRepository;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommentService"/> class.
+        /// </summary>
+        /// <param name="cr">The comment repository.</param>
+        /// <param name="pr">The post repository.</param>
+        /// <param name="userRepository">The user repository.</param>
         public CommentService(ICommentRepository cr, IPostRepository pr, IUserRepository userRepository)
         {
-            this.CommentRepository = cr;
-            this.PostRepository = pr;
-            this.UserRepository = userRepository;
+            this.commentRepository = cr;
+            this.postRepository = pr;    // Added null checks
+            this.userRepository = userRepository; // Added null checks
         }
-        public Comment ValidateAdd(string content, long userId, long postId)
+
+        /// <summary>
+        /// Validates and adds a new comment.
+        /// </summary>
+        /// <param name="content">The content of the comment.</param>
+        /// <param name="userId">The ID of the user adding the comment.</param>
+        /// <param name="postId">The ID of the post to which the comment is added.</param>
+        /// <returns>The created Comment object.</returns>
+        public Comment AddComment(string content, long userId, long postId)
         {
             if (content == null || content.Length == 0)
             {
-                throw new Exception("Comment content cannot be empty");
+                throw new ArgumentException("Comment content cannot be empty or null.", nameof(content));
             }
-            if (UserRepository.GetById(userId) == null)
+
+            if (this.userRepository.GetById(userId) == null)
             {
-                throw new Exception("User does not exist");
+                throw new InvalidOperationException($"User with ID {userId} does not exist.");
             }
-            if (PostRepository.GetById(postId) == null)
+
+            if (PostRepository.GetPostById(postId) == null)
             {
-                throw new Exception("Post does not exist");
+                throw new InvalidOperationException($"Post with ID {postId} does not exist.");
             }
-            Comment comment = new Comment() { Content = content, UserId = userId, PostId = postId, CreatedDate = DateTime.Now };
-            CommentRepository.Save(comment);
+
+            Comment comment = new Comment
+            {
+                Content = content,
+                UserId = userId,
+                PostId = postId,
+                CreatedDate = DateTime.Now,
+            };
+
+            this.commentRepository.Save(comment);
+
             return comment;
         }
-        public void ValidateDelete(long commentId)
-        {
-            if (CommentRepository.GetById(commentId) == null)
-            {
-                throw new Exception("Comment does not exist");
-            }
-            CommentRepository.DeleteById(commentId);
 
-        }
-        public void ValidateUpdate(long commentId, string content)
+        /// <summary>
+        /// Validates and deletes a comment by its ID.
+        /// </summary>
+        /// <param name="commentId">The ID of the comment to be deleted.</param>
+        /// <exception cref="InvalidOperationException">Thrown when the comment does not exist.</exception>
+        public void DeleteComment(long commentId)
         {
-            if (CommentRepository.GetById(commentId) == null)
+            if (CommentRepository.GetCommentById(commentId) == null)
+            {
+                throw new InvalidOperationException($"Comment with ID {commentId} does not exist.");
+            }
+
+            CommentRepository.DeleteCommentById(commentId);
+        }
+
+        /// <summary>
+        /// Validates if an update is possible.
+        /// </summary>
+        /// <param name="commentId">The ID of the comment that updates.</param>
+        /// <param name="content">The content which we want to update the comment with.</param>
+        /// <exception cref="Exception">Throw when comment with given Id is not found.</exception>
+        /// <exception cref="Exception">Throw when the given content is empty.</exception>
+        public void UpdateComment(long commentId, string content)
+        {
+            if (this.CommentRepository.GetById(commentId) == null)
+
             {
                 throw new Exception("Comment does not exist");
             }
@@ -56,20 +102,40 @@ namespace SocialApp.Services
             {
                 throw new Exception("Comment content cannot be empty");
             }
-            CommentRepository.UpdateById(commentId, content);
-        }
-        public List<Comment> GetAll()
-        {
-            return CommentRepository.GetAll();
-        }
-        public Comment GetById(int id)
-        {
-            return CommentRepository.GetById(id);
+
+            this.CommentRepository.UpdateCommentContentById(commentId, content);
+
         }
 
-        public List<Comment> GetCommentForPost(long postId)
+        /// <summary>
+        /// Gets all comments.
+        /// </summary>
+        /// <returns> A list of all the comments.</returns>
+        public List<Comment> GetAllComments()
         {
-            return CommentRepository.GetCommentsForPost(postId);
+            return this.CommentRepository.GetAllComments();
+
+        }
+
+        /// <summary>
+        /// Gets a comment by ID.
+        /// </summary>
+        /// <param name="commentId">The ID of the comment to retrieve.</param>
+        /// <returns>The comment with the specified ID.</returns>
+        public Comment GetCommentById(int commentId)
+        {
+            return this.CommentRepository.GetCommentById(commentId);
+
+        }
+
+        /// <summary>
+        /// Gets comments by post ID.
+        /// </summary>
+        /// <param name="postId">The ID of the post which the comments are retrieved from.</param>
+        /// <returns>A list of comments specified by the post.</returns>
+        public List<Comment> GetCommentsByPostId(long postId)
+        {
+            return this.CommentRepository.GetCommentsByPostId(postId);
         }
     }
 }

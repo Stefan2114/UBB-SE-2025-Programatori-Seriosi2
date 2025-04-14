@@ -103,6 +103,7 @@ namespace SocialApp.Pages
                 {
                     this.userService.FollowUser(this.controller.CurrentUser.Id, this.displayedUser.Id);
                     this.FollowLogOutButton.Content = "Unfollow";
+
                 }
             }
         }
@@ -205,6 +206,7 @@ namespace SocialApp.Pages
             if (this.displayedUser != null)
             {
                 List<User> followers = this.userService.GetUserFollowers(this.displayedUser.Id);
+
                 foreach (User user in followers)
                 {
                     this.FollowersStack.Children.Add(new Follower(user.Username, this.userService.GetUserFollowing(this.controller.CurrentUser?.Id ?? -1).Contains(user), user, this.Frame));
