@@ -1,47 +1,36 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using SocialApp.Repository;
-using SocialApp.Services;
 using SocialApp.Components;
 using SocialApp.Entities;
-using Microsoft.Extensions.DependencyInjection;
+using SocialApp.Repository;
+using SocialApp.Services;
 
 namespace SocialApp.Pages
 {
     public sealed partial class GroupPage : Page
     {
-        private const Visibility Collapsed = Visibility.Collapsed;
-        private const Visibility Visible = Visibility.Visible;
+        private const Visibility CollapsedVisibility = Visibility.Collapsed;
+        private const Visibility VisibleVisibility = Visibility.Visible;
 
-        private readonly IUserRepository _userRepository;
-        private readonly IUserService _userService;
-        private readonly IPostRepository _postRepository;
-        private readonly IPostService _postService;
-        private readonly IGroupRepository _groupRepository;
-        private readonly IGroupService _groupService;
+        private UserRepository _userRepository;
+        private UserService _userService;
+        private PostRepository _postRepository;
+        private PostService _postService;
+        private GroupRepository _groupRepository;
+        private GroupService _groupService;
 
+        private AppController _appController;
         private long _groupId;
         private Entities.Group _group;
-        private AppController _controller;
 
         public GroupPage()
         {
             InitializeComponent();
-            InitializeServices();
-            Loaded += OnPageLoaded;
-        }
-
-        private void InitializeServices()
-        {
-            _userRepository = new UserRepository();
-            _userService = new UserService(_userRepository);
-            _groupRepository = new GroupRepository();
-            _groupService = new GroupService(_groupRepository, _userRepository);
-            _postRepository = new PostRepository();
-            _postService = new PostService(_postRepository, _userRepository, _groupRepository);
+            InitializePageFlow();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -51,20 +40,58 @@ namespace SocialApp.Pages
                 _groupId = id;
             }
 
-            _controller = App.Services.GetService<AppController>();
+            _appController = App.Services.GetService<AppController>();
+        }
+
+        private void InitializePageFlow()
+        {
+            InitializeServices();
+            SetInitialVisibilityStates();
+            SetInitialContentValues();
+            SetInitialEventHandlers();
+        }
+
+        private void InitializeServices()
+        {
+            _userRepository = new UserRepository();
+            _userService = new UserService(_userRepository);
+
+            _groupRepository = new GroupRepository();
+            _groupService = new GroupService(_groupRepository, _userRepository);
+
+            _postRepository = new PostRepository();
+            _postService = new PostService(_postRepository, _userRepository, _groupRepository);
+        }
+
+        private void SetInitialVisibilityStates()
+        {
+            PostsFeed.Visibility = CollapsedVisibility;
+            // AdminPanel.Visibility = CollapsedVisibility; // if applicable
+        }
+
+        private void SetInitialContentValues()
+        {
+            GroupTitle.Text = "Loading...";
+            GroupDescription.Text = string.Empty;
+        }
+
+        private void SetInitialEventHandlers()
+        {
+            Loaded += OnPageLoaded;
+            CreatePostInGroupButton.Click += OnCreatePostClicked;
+        }
+
+        private async void OnPageLoaded(object sender, RoutedEventArgs e)
+        {
             InitializeTopBar();
+            await LoadGroupDataAsync();
+            InitializeUI();
         }
 
         private void InitializeTopBar()
         {
             TopBar.SetFrame(Frame);
             TopBar.SetNone();
-        }
-
-        private async void OnPageLoaded(object sender, RoutedEventArgs e)
-        {
-            await LoadGroupDataAsync();
-            InitializeUI();
         }
 
         private async Task LoadGroupDataAsync()
@@ -94,9 +121,9 @@ namespace SocialApp.Pages
         private void PopulateFeed()
         {
             PostsFeed.ClearPosts();
-            var groupPosts = _postService.GetPostsByGroupId(_groupId);
+            var posts = _postService.GetPostsByGroupId(_groupId);
 
-            foreach (var post in groupPosts)
+            foreach (var post in posts)
             {
                 PostsFeed.AddPost(new PostComponent(
                     post.Title,
@@ -108,7 +135,7 @@ namespace SocialApp.Pages
                     post.Id));
             }
 
-            PostsFeed.Visibility = Visible;
+            PostsFeed.Visibility = VisibleVisibility;
             PostsFeed.DisplayCurrentPage();
         }
 
@@ -127,17 +154,16 @@ namespace SocialApp.Pages
         private void SetAdminControlsVisibility()
         {
             var isAdmin = IsCurrentUserAdmin();
-            // Set visibility of admin-only controls here
-            // Example: AdminPanel.Visibility = isAdmin ? Visible : Collapsed;
+            // AdminPanel.Visibility = isAdmin ? VisibleVisibility : CollapsedVisibility;
         }
 
         private bool IsCurrentUserAdmin()
         {
-            return _controller.CurrentUser != null &&
-                   _group.AdminId == _controller.CurrentUser.Id;
+            return _appController.CurrentUser != null &&
+                   _group.AdminId == _appController.CurrentUser.Id;
         }
 
-        private void CreatePostInGroupButton_Click(object sender, RoutedEventArgs e)
+        private void OnCreatePostClicked(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(CreatePost), new PostNavigationParams
             {
