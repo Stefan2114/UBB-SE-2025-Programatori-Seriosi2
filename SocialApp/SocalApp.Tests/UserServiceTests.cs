@@ -197,5 +197,116 @@
             Assert.That(ex.Message, Is.EqualTo("User does not exist"));
             userRepository.Received(1).GetById(userId);
         }
+      
+      [Test]
+        public void TestFollowUser_ValidUsers_Success()
+        {
+            // Arrange
+            var userRepository = Substitute.For<IUserRepository>();
+            var userService = new UserService(userRepository);
+            var followerId = 1;
+            var followedId = 2;
+
+            userRepository.GetById(followerId).Returns(new User { Id = followerId, Username = "follower", Email = "follower@example.com", PasswordHash = "hash1", Image = "img1.png" });
+            userRepository.GetById(followedId).Returns(new User { Id = followedId, Username = "followed", Email = "followed@example.com", PasswordHash = "hash2", Image = "img2.png" });
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => userService.FollowUserById(followerId, followedId));
+            userRepository.Received(1).Follow(followerId, followedId);
+        }
+      
+      
+      
+      [Test]
+        public void TestFollowUser_FollowerDoesNotExist_ThrowsException()
+        {
+            // Arrange
+            var userRepository = Substitute.For<IUserRepository>();
+            var userService = new UserService(userRepository);
+            var nonExistentFollowerId = 1;
+            var followedId = 2;
+
+            userRepository.GetById(nonExistentFollowerId).Returns((User)null);
+            userRepository.GetById(followedId).Returns(new User { Id = followedId, Username = "followed", Email = "followed@example.com", PasswordHash = "hash2", Image = "img2.png" });
+
+            // Act & Assert
+            var ex = Assert.Throws<Exception>(() => userService.FollowUserById(nonExistentFollowerId, followedId));
+            Assert.That(ex.Message, Is.EqualTo("User does not exist"));
+            userRepository.DidNotReceive().Follow(Arg.Any<long>(), Arg.Any<long>());
+        }
+      
+      
+      [Test]
+        public void TestFollowUser_FollowedDoesNotExist_ThrowsException()
+        {
+            // Arrange
+            var userRepository = Substitute.For<IUserRepository>();
+            var userService = new UserService(userRepository);
+            var followerId = 1;
+            var nonExistentFollowedId = 2;
+
+            userRepository.GetById(followerId).Returns(new User { Id = followerId, Username = "follower", Email = "follower@example.com", PasswordHash = "hash1", Image = "img1.png" });
+            userRepository.GetById(nonExistentFollowedId).Returns((User)null);
+
+            // Act & Assert
+            var ex = Assert.Throws<Exception>(() => userService.FollowUserById(followerId, nonExistentFollowedId));
+            Assert.That(ex.Message, Is.EqualTo("User to follow does not exist"));
+            userRepository.DidNotReceive().Follow(Arg.Any<long>(), Arg.Any<long>());
+        }
+
+        [Test]
+        public void TestUnfollowUser_ValidUsers_Success()
+        {
+            // Arrange
+            var userRepository = Substitute.For<IUserRepository>();
+            var userService = new UserService(userRepository);
+            var followerId = 1;
+            var followedId = 2;
+
+            userRepository.GetById(followerId).Returns(new User { Id = followerId, Username = "follower", Email = "follower@example.com", PasswordHash = "hash1", Image = "img1.png" });
+            userRepository.GetById(followedId).Returns(new User { Id = followedId, Username = "followed", Email = "followed@example.com", PasswordHash = "hash2", Image = "img2.png" });
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => userService.UnfollowUserById(followerId, followedId));
+            userRepository.Received(1).Unfollow(followerId, followedId);
+        }
+      
+      
+      
+        [Test]
+        public void TestUnfollowUser_FollowerDoesNotExist_ThrowsException()
+        {
+            // Arrange
+            var userRepository = Substitute.For<IUserRepository>();
+            var userService = new UserService(userRepository);
+            var nonExistentFollowerId = 1;
+            var followedId = 2;
+
+            userRepository.GetById(nonExistentFollowerId).Returns((User)null);
+            userRepository.GetById(followedId).Returns(new User { Id = followedId, Username = "followed", Email = "followed@example.com", PasswordHash = "hash2", Image = "img2.png" });
+
+            // Act & Assert
+            var ex = Assert.Throws<Exception>(() => userService.UnfollowUserById(nonExistentFollowerId, followedId));
+            Assert.That(ex.Message, Is.EqualTo("User does not exist"));
+            userRepository.DidNotReceive().Unfollow(Arg.Any<long>(), Arg.Any<long>());
+        }
+
+        [Test]
+        public void TestUnfollowUser_FollowedDoesNotExist_ThrowsException()
+        {
+            // Arrange
+            var userRepository = Substitute.For<IUserRepository>();
+            var userService = new UserService(userRepository);
+            var followerId = 1;
+            var nonExistentFollowedId = 2;
+
+            userRepository.GetById(followerId).Returns(new User { Id = followerId, Username = "follower", Email = "follower@example.com", PasswordHash = "hash1", Image = "img1.png" });
+            userRepository.GetById(nonExistentFollowedId).Returns((User)null);
+
+            // Act & Assert
+            var ex = Assert.Throws<Exception>(() => userService.UnfollowUserById(followerId, nonExistentFollowedId));
+            Assert.That(ex.Message, Is.EqualTo("User to unfollow does not exist"));
+            userRepository.DidNotReceive().Unfollow(Arg.Any<long>(), Arg.Any<long>());
+        }
     }
 }

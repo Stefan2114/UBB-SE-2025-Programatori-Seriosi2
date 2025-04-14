@@ -63,11 +63,11 @@ namespace SocialApp.Components
             Button.Content = Button.Content.ToString() == "Follow" ? "Unfollow" : "Follow";
             if (!IsFollowed())
             {
-                userService.FollowUser(controller.CurrentUser.Id, user.Id);
+                userService.FollowUserById(controller.CurrentUser.Id, user.Id);
             }
             else
             {
-                userService.UnfollowUser(controller.CurrentUser.Id, user.Id);
+                userService.UnfollowUserById(controller.CurrentUser.Id, user.Id);
             }
         }
     }

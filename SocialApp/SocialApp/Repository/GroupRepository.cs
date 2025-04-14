@@ -1,35 +1,51 @@
-﻿using Microsoft.Data.SqlClient;
-using SocialApp.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Windows.Networking.Sockets;
-using Group = SocialApp.Entities.Group;
+﻿// <copyright file="GroupRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace SocialApp.Repository
 {
-    public class GroupRepository : IGroupRepository
-    {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
+    using global::Windows.Networking.Sockets;
+    using Microsoft.Data.SqlClient;
+    using SocialApp.Entities;
+    using Group = SocialApp.Entities.Group;
 
+    /// <summary>
+    /// Repository class for managing Group entities.
+    /// </summary>
+    public partial class GroupRepository : IGroupRepository, IDisposable
+    {
         private string loginString = "Data Source=vm;" +
     "Initial Catalog=team_babes;" +
     "Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
+
         private SqlConnection connection;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GroupRepository"/> class.
+        /// </summary>
         public GroupRepository()
         {
-            this.connection = new SqlConnection(loginString);
+            this.connection = new SqlConnection(this.loginString);
         }
 
-        public List<Group> GetAll()
+        /// <summary>
+        /// Gets all groups from the database.
+        /// </summary>
+        /// <returns>
+        /// a list of all groups.
+        /// </returns>
+        public List<Group> GetAllGroups()
         {
             List<Group> ans = new List<Group>();
-            connection.Open();
+            this.connection.Open();
 
-            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Groups", connection);
+            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Groups", this.connection);
             SqlDataReader reader = selectCommand.ExecuteReader();
             while (reader.Read())
             {
@@ -39,25 +55,34 @@ namespace SocialApp.Repository
                     Name = reader.IsDBNull(reader.GetOrdinal("Name")) ? string.Empty : reader.GetString(reader.GetOrdinal("Name")),
                     AdminId = reader.GetInt64(reader.GetOrdinal("AdminId")),
                     Image = reader.IsDBNull(reader.GetOrdinal("Image")) ? string.Empty : reader.GetString(reader.GetOrdinal("Image")),
-                    Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? string.Empty : reader.GetString(reader.GetOrdinal("Description"))
+                    Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? string.Empty : reader.GetString(reader.GetOrdinal("Description")),
                 };
 
                 ans.Add(group);
             }
+
             reader.Close();
-            connection.Close();
+            this.connection.Close();
 
             return ans;
         }
 
+        /// <summary>
+        /// Gets all users from a specific group.
+        /// </summary>
+        /// <param name="id">
+        /// the id of the group.
+        /// </param>
+        /// <returns>
+        /// a list of users in the group.
+        /// </returns>
         public List<User> GetUsersFromGroup(long id)
         {
-            connection.Open();
+            this.connection.Open();
             List<User> ans = new List<User>();
             SqlCommand selectCommand = new SqlCommand(
                 "SELECT * FROM Users WHERE Id IN (SELECT UserId FROM GroupUsers WHERE GroupId = @Id)",
-                connection
-            );
+                this.connection);
             selectCommand.Parameters.AddWithValue("@Id", id);
 
             SqlDataReader reader = selectCommand.ExecuteReader();
@@ -69,24 +94,32 @@ namespace SocialApp.Repository
                     Username = reader.GetString(reader.GetOrdinal("Username")),
                     Email = reader.GetString(reader.GetOrdinal("Email")),
                     PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
-                    Image = reader.IsDBNull(reader.GetOrdinal("Image")) ? string.Empty : reader.GetString(reader.GetOrdinal("Image"))
+                    Image = reader.IsDBNull(reader.GetOrdinal("Image")) ? string.Empty : reader.GetString(reader.GetOrdinal("Image")),
                 };
                 ans.Add(user);
             }
-            reader.Close();
-            connection.Close();
-            return ans;
 
+            reader.Close();
+            this.connection.Close();
+            return ans;
         }
 
+        /// <summary>
+        /// Gets all groups for a specific user.
+        /// </summary>
+        /// <param name="userId">
+        /// the id of the user.
+        /// </param>
+        /// <returns>
+        /// a list of groups the user is part of.
+        /// </returns>
         public List<Group> GetGroupsForUser(long userId)
         {
-            connection.Open();
+            this.connection.Open();
             List<Group> ans = new List<Group>();
             SqlCommand selectCommand = new SqlCommand(
                 "SELECT * FROM Groups WHERE Id IN (SELECT GroupId FROM GroupUsers WHERE UserId = @UserId)",
-                connection
-            );
+                this.connection);
             selectCommand.Parameters.AddWithValue("@UserId", userId);
             SqlDataReader reader = selectCommand.ExecuteReader();
 
@@ -98,33 +131,45 @@ namespace SocialApp.Repository
                     Name = reader.IsDBNull(reader.GetOrdinal("Name")) ? string.Empty : reader.GetString(reader.GetOrdinal("Name")),
                     AdminId = reader.GetInt64(reader.GetOrdinal("AdminId")),
                     Image = reader.IsDBNull(reader.GetOrdinal("Image")) ? string.Empty : reader.GetString(reader.GetOrdinal("Image")),
-                    Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? string.Empty : reader.GetString(reader.GetOrdinal("Description"))
+                    Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? string.Empty : reader.GetString(reader.GetOrdinal("Description")),
                 };
                 ans.Add(group);
             }
+
             reader.Close();
-            connection.Close();
+            this.connection.Close();
             return ans;
         }
 
-        public void DeleteById(long id)
+        /// <summary>
+        /// Deletes a group by its ID.
+        /// </summary>
+        /// <param name="id">
+        /// the ID of the group to delete.
+        /// </param>
+        public void DeleteGroupById(long id)
         {
-            connection.Open();
+            this.connection.Open();
 
-            SqlCommand deleteCommand = new SqlCommand("DELETE FROM Groups WHERE Id = @Id", connection);
+            SqlCommand deleteCommand = new SqlCommand("DELETE FROM Groups WHERE Id = @Id", this.connection);
             string queryParam = id.ToString();
             deleteCommand.Parameters.AddWithValue("@Id", queryParam);
             deleteCommand.ExecuteNonQuery();
 
-            connection.Close();
+            this.connection.Close();
         }
 
-        public Group GetById(long id)
+        /// <summary>
+        /// Gets a group by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the group to retrieve.</param>
+        /// <returns>The group with the specified ID, or null if not found.</returns>
+        public Group GetGroupsById(long id)
         {
-            connection.Open();
-            Group group = null;
+            this.connection.Open();
+            Group? group = null;
 
-            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Groups WHERE Id = @Id", connection);
+            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Groups WHERE Id = @Id", this.connection);
             selectCommand.Parameters.AddWithValue("@Id", id);
 
             SqlDataReader reader = selectCommand.ExecuteReader();
@@ -136,24 +181,29 @@ namespace SocialApp.Repository
                     Name = reader.IsDBNull(reader.GetOrdinal("Name")) ? string.Empty : reader.GetString(reader.GetOrdinal("Name")),
                     AdminId = reader.GetInt64(reader.GetOrdinal("AdminId")),
                     Image = reader.IsDBNull(reader.GetOrdinal("Image")) ? string.Empty : reader.GetString(reader.GetOrdinal("Image")),
-                    Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? string.Empty : reader.GetString(reader.GetOrdinal("Description"))
+                    Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? string.Empty : reader.GetString(reader.GetOrdinal("Description")),
                 };
             }
 
             reader.Close();
-            connection.Close();
-            return group;
+            this.connection.Close();
+            return group!;
         }
 
-        public void Save(Group entity)
+        /// <summary>
+        /// Saves a new group to the database.
+        /// </summary>
+        /// <param name="entity">
+        /// the group entity to save.
+        /// </param>
+        public void SaveGroup(Group entity)
         {
-            connection.Open();
+            this.connection.Open();
 
             SqlCommand insertCommand = new SqlCommand(
                 "INSERT INTO Groups (Name, AdminId, Image, Description) VALUES (@Name, @AdminId, @Image, @Description); " +
                 "SELECT SCOPE_IDENTITY();",
-                connection
-            );
+                this.connection);
             insertCommand.Parameters.AddWithValue("@Name", entity.Name);
             insertCommand.Parameters.AddWithValue("@AdminId", entity.AdminId);
             insertCommand.Parameters.AddWithValue("@Image", entity.Image);
@@ -162,23 +212,39 @@ namespace SocialApp.Repository
 
             insertCommand = new SqlCommand(
                 "INSERT INTO GroupUsers (GroupId, UserId) VALUES (@GroupId, @UserId)",
-                connection
-            );
+                this.connection);
             insertCommand.Parameters.AddWithValue("@GroupId", entity.Id);
             insertCommand.Parameters.AddWithValue("@UserId", entity.AdminId);
             insertCommand.ExecuteNonQuery();
 
-            connection.Close();
+            this.connection.Close();
         }
 
-        public void UpdateById(long id, string name, string image, string description, long adminId)
+        /// <summary>
+        /// Updates a group by its ID.
+        /// </summary>
+        /// <param name="id">
+        /// the ID of the group to update.
+        /// </param>
+        /// <param name="name">
+        /// the new name of the group.
+        /// </param>
+        /// <param name="image">
+        /// the new image of the group.
+        /// </param>
+        /// <param name="description">
+        /// the new description of the group.
+        /// </param>
+        /// <param name="adminId">
+        /// the ID of the admin.
+        /// </param>
+        public void UpdateGroupById(long id, string name, string image, string description, long adminId)
         {
-            connection.Open();
+            this.connection.Open();
 
             SqlCommand updateCommand = new SqlCommand(
                 "UPDATE Groups SET Name = @Name, AdminId = @AdminId, Description=@Description, Image=@Image WHERE Id = @Id",
-                connection
-            );
+                this.connection);
 
             updateCommand.Parameters.AddWithValue("@Id", id);
             updateCommand.Parameters.AddWithValue("@Name", name);
@@ -187,7 +253,18 @@ namespace SocialApp.Repository
             updateCommand.Parameters.AddWithValue("@Image", image);
             updateCommand.ExecuteNonQuery();
 
-            connection.Close();
+            this.connection.Close();
+        }
+
+        /// <summary>
+        /// Disposes the resources used by the GroupRepository.
+        /// </summary>
+        /// <exception cref="NotImplementedException">
+        /// Thrown because the method is not implemented.
+        /// </exception>
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }

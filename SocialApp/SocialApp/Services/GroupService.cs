@@ -30,7 +30,7 @@ namespace SocialApp.Services
                 throw new Exception("User does not exist");
             }
             Group group = new Group() { Name = name, AdminId = adminId, Image = image, Description = desc };
-            GroupRepository.Save(group);
+            GroupRepository.SaveGroup(group);
             return group;
         }
         public void ValidateDelete(long groupId)

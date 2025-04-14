@@ -90,12 +90,12 @@ namespace SocialApp.Pages
             {
                 if (IsFollowed())
                 {
-                    userService.UnfollowUser(controller.CurrentUser.Id, displayedUser.Id);
+                    userService.UnfollowUserById(controller.CurrentUser.Id, displayedUser.Id);
                     FollowLogOutButton.Content = "Follow";
                 }
                 else
                 {
-                    userService.FollowUser(controller.CurrentUser.Id, displayedUser.Id);
+                    userService.FollowUserById(controller.CurrentUser.Id, displayedUser.Id);
                     FollowLogOutButton.Content = "Unfollow";
                 }
             }
@@ -197,7 +197,7 @@ namespace SocialApp.Pages
 
             if (displayedUser != null)
             {
-                List<User> followers = userService.GetUserFollowers(displayedUser.Id);
+                List<User> followers = userService.GetUserFollowersFromId(displayedUser.Id);
                 foreach (User user in followers)
                 {
                     FollowersStack.Children.Add(new Follower(user.Username, userService.GetUserFollowing(controller.CurrentUser?.Id ?? -1).Contains(user), user, this.Frame));
