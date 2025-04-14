@@ -128,7 +128,7 @@ namespace SocialApp.Components
 
         private void LoadComments()
         {
-            var comments = commentService.GetCommentForPost(postId);
+            var comments = commentService.GetCommentsByPostId(postId);
             CommentsListView.ItemsSource = comments;
         }
 

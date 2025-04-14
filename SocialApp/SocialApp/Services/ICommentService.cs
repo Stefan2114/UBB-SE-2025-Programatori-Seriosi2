@@ -5,11 +5,12 @@ namespace SocialApp.Services
 {
     public interface ICommentService
     {
-        List<Comment> GetAll();
-        Comment GetById(int id);
-        List<Comment> GetCommentForPost(long postId);
-        Comment AddComment(string content, long userId, long postId);
-        void DeleteComment(long commentId);
-        void ValidateUpdate(long commentId, string content);
+
+        List<Comment> GetAllComments();
+        Comment GetCommentById(int commentId);
+        List<Comment> GetCommentsByPostId(long postId);
+        Comment ValidateAdd(string content, long userId, long postId);
+        void ValidateDelete(long commentId);
+        void UpdateComment(long commentId, string content);
     }
 }
