@@ -9,6 +9,7 @@
         private const string ConnectionString = "Data Source=DESKTOP-O4IR5P1\\SQLEXPRESS;Initial Catalog=ISSDB;Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
         private readonly SqlConnection connection;
 
+
         public UserRepository() : this(ConnectionString) { }
 
         public UserRepository(string loginString)

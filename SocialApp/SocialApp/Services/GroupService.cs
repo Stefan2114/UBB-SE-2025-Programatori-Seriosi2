@@ -30,7 +30,8 @@
             }
 
             Group group = new Group() { Name = name, AdminId = adminId, Image = image, Description = desc };
-            this.groupRepository.Save(group);
+
+            GroupRepository.SaveGroup(group);
             return group;
         }
 
