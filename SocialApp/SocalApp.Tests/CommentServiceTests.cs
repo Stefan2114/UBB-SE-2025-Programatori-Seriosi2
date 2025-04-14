@@ -16,7 +16,7 @@ namespace SocialApp.Tests
         /// Validates that the ValidateAdd method successfully adds a comment when provided with valid arguments.
         /// </summary>
         [Test]
-        public void TestAddCommentValid()
+        public void ValidateAddComment_WithValidArguments_ReturnsComment()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
@@ -50,7 +50,7 @@ namespace SocialApp.Tests
         /// Validates that the ValidateAdd method throws an exception when the content is empty.
         /// </summary>
         [Test]
-        public void TestAddCommentNoContent()
+        public void ValidateAddComment_WithInvalidContent_ThrowsException()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
@@ -72,7 +72,7 @@ namespace SocialApp.Tests
         /// Validates that the ValidateAdd method throws an exception when the user does not exist.
         /// </summary>
         [Test]
-        public void TestAddContentNoUser()
+        public void ValidateAddComment_WithInvalidUser_ThrowsException()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
@@ -97,7 +97,7 @@ namespace SocialApp.Tests
         /// Validates that the ValidateAdd method throws an exception when the post does not exist.
         /// </summary>
         [Test]
-        public void TestAddCommentInvalidPost()
+        public void ValidateAddComment_WithInvalidPost_ThrowsException()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
@@ -126,7 +126,7 @@ namespace SocialApp.Tests
         /// Validates that the ValidateDelete method successfully deletes a comment when provided with a valid comment ID.
         /// </summary>
         [Test]
-        public void TestDeleteCommentValid()
+        public void ValidateDeleteComment_WithValidCommentId()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
@@ -151,7 +151,7 @@ namespace SocialApp.Tests
         /// Validates that the ValidateDelete method throws an exception when the comment does not exist.
         /// </summary>
         [Test]
-        public void TestDeleteCommentInvalid()
+        public void ValidateDeleteComment_WithInvalidCommentId_ThrowsException()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
