@@ -11,6 +11,6 @@ namespace SocialApp.Services
         List<User> GetUsersFromGroup(long groupId);
         Group ValidateAdd(string name, string desc, string image, long adminId);
         void ValidateDelete(long groupId);
-        void ValidateUpdate(long id, string name, string desc, string image, long adminId);
+        void UpdateUser(long id, string name, string desc, string image, long adminId);
     }
 }

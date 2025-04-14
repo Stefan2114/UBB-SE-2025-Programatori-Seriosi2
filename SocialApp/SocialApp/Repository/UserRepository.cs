@@ -1,137 +1,201 @@
 ﻿namespace SocialApp.Repository
 {
-    using System;
     using System.Collections.Generic;
     using Microsoft.Data.SqlClient;
     using SocialApp.Entities;
+
     public class UserRepository : IUserRepository
     {
-        private const string ConnectionString = "Data Source=vm;Initial Catalog=team_babes;Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
+        private const string ConnectionString = "Data Source=DESKTOP-O4IR5P1\\SQLEXPRESS;Initial Catalog=ISSDB;Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
         private readonly SqlConnection connection;
 
         public UserRepository() : this(ConnectionString) { }
 
-        public UserRepository(string connectionString)
+        public UserRepository(string loginString)
         {
-           this.connection = new SqlConnection(connectionString);
+            this.connection = new SqlConnection(loginString);
         }
 
         public List<User> GetAll()
         {
-            return this.ExecuteQuery("SELECT * FROM Users", MapUser);
+            this.connection.Open();
+            var users = new List<User>();
+
+            using (var command = new SqlCommand("SELECT * FROM Users", this.connection))
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    users.Add(this.CreateUserFromReader(reader));
+                }
+            }
+
+            this.connection.Close();
+            return users;
         }
 
         public List<User> GetUserFollowers(long userId)
         {
-            const string query = "SELECT * FROM Users WHERE Id IN (SELECT FollowerId FROM UserFollowers WHERE UserId = @UserId)";
-            return this.ExecuteQuery(query, MapUser, new SqlParameter("@UserId", userId));
+            this.connection.Open();
+            var followers = new List<User>();
+
+            using (var command = new SqlCommand(
+                "SELECT * FROM Users WHERE Id IN (SELECT FollowerId FROM UserFollowers WHERE UserId = @UserId)",
+                this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", userId);
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        followers.Add(this.CreateUserFromReader(reader));
+                    }
+                }
+            }
+
+            this.connection.Close();
+            return followers;
         }
 
         public List<User> GetUserFollowing(long userId)
         {
-            const string query = "SELECT * FROM Users WHERE Id IN (SELECT UserId FROM UserFollowers WHERE FollowerId = @UserId)";
-            return this.ExecuteQuery(query, MapUser, new SqlParameter("@UserId", userId));
+            this.connection.Open();
+            var following = new List<User>();
+
+            using (var command = new SqlCommand(
+                "SELECT * FROM Users WHERE Id IN (SELECT UserId FROM UserFollowers WHERE FollowerId = @UserId)",
+                this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", userId);
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        following.Add(this.CreateUserFromReader(reader));
+                    }
+                }
+            }
+
+            this.connection.Close();
+            return following;
         }
 
         public void Follow(long followerId, long followeeId)
         {
-            const string query = "INSERT INTO UserFollowers (UserId, FollowerId) VALUES (@UserId, @FollowerId)";
-            this.ExecuteNonQuery(query, new SqlParameter("@UserId", followeeId), new SqlParameter("@FollowerId", followerId));
+            this.connection.Open();
+            using (var command = new SqlCommand(
+                "INSERT INTO UserFollowers (UserId, FollowerId) VALUES (@UserId, @FollowerId)",
+                this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", followeeId);
+                command.Parameters.AddWithValue("@FollowerId", followerId);
+                command.ExecuteNonQuery();
+            }
+            this.connection.Close();
         }
 
         public void Unfollow(long followerId, long followeeId)
         {
-            const string query = "DELETE FROM UserFollowers WHERE UserId = @UserId AND FollowerId = @FollowerId";
-            this.ExecuteNonQuery(query, new SqlParameter("@UserId", followeeId), new SqlParameter("@FollowerId", followerId));
+            this.connection.Open();
+            using (var command = new SqlCommand(
+                "DELETE FROM UserFollowers WHERE UserId = @UserId AND FollowerId = @FollowerId",
+                this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", followeeId);
+                command.Parameters.AddWithValue("@FollowerId", followerId);
+                command.ExecuteNonQuery();
+            }
+
+            this.connection.Close();
         }
 
         public User GetByEmail(string email)
         {
-            const string query = "SELECT * FROM Users WHERE Email = @Email";
-            return this.ExecuteSingle(query, MapUser, new SqlParameter("@Email", email));
+            this.connection.Open();
+            using (var command = new SqlCommand("SELECT * FROM Users WHERE Email = @Email", this.connection))
+            {
+                command.Parameters.AddWithValue("@Email", email);
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return this.CreateUserFromReader(reader);
+                    }
+                }
+            }
+
+            this.connection.Close();
+            return null;
         }
 
-        public User GetById(long id)
+        public User GetById(long userId)
         {
-            const string query = "SELECT * FROM Users WHERE Id = @Id";
-            return this.ExecuteSingle(query, MapUser, new SqlParameter("@Id", id));
+            this.connection.Open();
+            using (var command = new SqlCommand("SELECT * FROM Users WHERE Id = @UserId", this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", userId);
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return this.CreateUserFromReader(reader);
+                    }
+                }
+            }
+
+            this.connection.Close();
+
+            return null;
         }
 
         public void Save(User user)
         {
-            const string query = "INSERT INTO Users (Username, Email, PasswordHash, Image) VALUES (@Username, @Email, @PasswordHash, @Image)";
-            this.ExecuteNonQuery(query, new SqlParameter("@Username", user.Username), new SqlParameter("@Email", user.Email), new SqlParameter("@PasswordHash", user.PasswordHash), new SqlParameter("@Image", user.Image));
-        }
-
-        public void UpdateById(long id, string username, string email, string passwordHash, string image)
-        {
-            const string query = "UPDATE Users SET Username = @Username, Email = @Email, PasswordHash = @PasswordHash, Image = @Image WHERE Id = @Id";
-            this.ExecuteNonQuery(query, new SqlParameter("@Id", id), new SqlParameter("@Username", username), new SqlParameter("@Email", email), new SqlParameter("@PasswordHash", passwordHash), new SqlParameter("@Image", image));
-        }
-
-        public void DeleteById(long id)
-        {
-            const string query = "DELETE FROM Users WHERE Id = @Id";
-            this.ExecuteNonQuery(query, new SqlParameter("@Id", id));
-        }
-
-        private List<User> ExecuteQuery(string query, Func<SqlDataReader, User> mapper, params SqlParameter[] parameters)
-        {
-            try
+            this.connection.Open();
+            using (var command = new SqlCommand(
+                "INSERT INTO Users (Username, Email, PasswordHash, Image) VALUES (@Username, @Email, @PasswordHash, @Image)",
+                this.connection))
             {
-                this.connection.Open();
-                using var command = new SqlCommand(query, this.connection);
-                command.Parameters.AddRange(parameters);
-
-                var results = new List<User>();
-                using var reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    results.Add(mapper(reader));
-                }
-
-                return results;
-            }
-            finally
-            {
-                this.connection.Close();
-            }
-        }
-
-        private User ExecuteSingle(string query, Func<SqlDataReader, User> mapper, params SqlParameter[] parameters)
-        {
-            try
-            {
-                this.connection.Open();
-                using var command = new SqlCommand(query, this.connection);
-                command.Parameters.AddRange(parameters);
-
-                using var reader = command.ExecuteReader();
-                return reader.Read() ? mapper(reader) : null;
-            }
-            finally
-            {
-                this.connection.Close();
-            }
-        }
-
-
-        private void ExecuteNonQuery(string query, params SqlParameter[] parameters)
-        {
-            try
-            {
-                this.connection.Open();
-                using var command = new SqlCommand(query, this.connection);
-                command.Parameters.AddRange(parameters);
+                command.Parameters.AddWithValue("@Username", user.Username);
+                command.Parameters.AddWithValue("@Email", user.Email);
+                command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
+                command.Parameters.AddWithValue("@Image", user.Image);
                 command.ExecuteNonQuery();
             }
-            finally
-            {
-               this.connection.Close();
-            }
+
+            this.connection.Close();
         }
 
-        private static User MapUser(SqlDataReader reader)
+        public void UpdateById(long userId, string username, string email, string passwordHash, string image)
+        {
+            this.connection.Open();
+            using (var command = new SqlCommand(
+                "UPDATE Users SET Username = @Username, Email = @Email, PasswordHash = @PasswordHash, Image = @Image WHERE Id = @UserId",
+                this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", userId);
+                command.Parameters.AddWithValue("@Username", username);
+                command.Parameters.AddWithValue("@Email", email);
+                command.Parameters.AddWithValue("@PasswordHash", passwordHash);
+                command.Parameters.AddWithValue("@Image", image);
+                command.ExecuteNonQuery();
+            }
+
+            this.connection.Close();
+        }
+
+        public void DeleteById(long userId)
+        {
+            this.connection.Open();
+            using (var command = new SqlCommand("DELETE FROM Users WHERE Id = @UserId", this.connection))
+            {
+                command.Parameters.AddWithValue("@UserId", userId);
+                command.ExecuteNonQuery();
+            }
+
+            this.connection.Close();
+        }
+
+        private User CreateUserFromReader(SqlDataReader reader)
         {
             return new User
             {

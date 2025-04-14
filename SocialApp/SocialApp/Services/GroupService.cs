@@ -1,11 +1,11 @@
-﻿
-using System;
-using System.Collections.Generic;
-using SocialApp.Entities;
-using SocialApp.Repository;
-
-namespace SocialApp.Services
+﻿namespace SocialApp.Services
 {
+
+    using System;
+    using System.Collections.Generic;
+    using SocialApp.Entities;
+    using SocialApp.Repository;
+
     public class GroupService : IGroupService
     {
         private IGroupRepository groupRepository;
@@ -20,25 +20,29 @@ namespace SocialApp.Services
         public Group ValidateAdd(string name, string desc, string image, long adminId)
         {
             if (name == null || name.Length == 0)
+            {
                 throw new Exception("Group name cannot be empty");
+            }
 
             if (userRepository.GetById(adminId) == null)
+            {
                 throw new Exception("User does not exist");
+            }
 
             Group group = new Group() { Name = name, AdminId = adminId, Image = image, Description = desc };
-            groupRepository.Save(group);
+            this.groupRepository.Save(group);
             return group;
         }
 
         public void ValidateDelete(long groupId)
         {
-            if (groupRepository.GetById(groupId) == null)
+            if (this.groupRepository.GetById(groupId) == null)
                 throw new Exception("Group does not exist");
 
-            groupRepository.DeleteById(groupId);
+            this.groupRepository.DeleteById(groupId);
         }
 
-        public void ValidateUpdate(long id, string name, string desc, string image, long adminId)
+        public void UpdateUser(long id, string name, string desc, string image, long adminId)
         {
             if (this.groupRepository.GetById(id) == null)
             {

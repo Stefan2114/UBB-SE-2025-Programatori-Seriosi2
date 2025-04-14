@@ -10,15 +10,15 @@
 
     public class GroupServiceTests
     {
-        private readonly IGroupRepository groupRepo;
-        private readonly IUserRepository userRepo;
+        private readonly IGroupRepository groupRepository;
+        private readonly IUserRepository userRepository;
         private readonly GroupService service;
 
         public GroupServiceTests()
         {
-            this.groupRepo = Substitute.For<IGroupRepository>();
-            this.userRepo = Substitute.For<IUserRepository>();
-            this.service = new GroupService(this.groupRepo, this.userRepo);
+            this.groupRepository = Substitute.For<IGroupRepository>();
+            this.userRepository = Substitute.For<IUserRepository>();
+            this.service = new GroupService(this.groupRepository, this.userRepository);
         }
 
         private Group CreateTestGroup(long id = 1, long adminId = 1)
@@ -46,57 +46,57 @@
         }
 
         [Test]
-        public void ValidateUpdate_WithValidData_UpdatesGroup()
+        public void UpdateUser_WithValidData_UpdatesGroup()
         {
             // Arrange
             var groupId = 1L;
             var adminId = 1L;
-            this.groupRepo.GetById(groupId).Returns(CreateTestGroup());
-            this.userRepo.GetById(adminId).Returns(CreateTestUser());
+            this.groupRepository.GetById(groupId).Returns(this.CreateTestGroup());
+            this.userRepository.GetById(adminId).Returns(this.CreateTestUser());
 
             // Act
-            this.service.ValidateUpdate(groupId, "New Name", "New Desc", "new.jpg", adminId);
+            this.service.UpdateUser(groupId, "New Name", "New Desc", "new.jpg", adminId);
 
             // Assert
-            this.groupRepo.Received(1).UpdateById(groupId, "New Name", "new.jpg", "New Desc", adminId);
+            this.groupRepository.Received(1).UpdateById(groupId, "New Name", "new.jpg", "New Desc", adminId);
         }
 
         [Test]
-        public void ValidateUpdate_WithNonexistentGroup_ThrowsException()
+        public void UpdateUser_WithNonexistentGroup_ThrowsException()
         {
             // Arrange
-            this.groupRepo.GetById(Arg.Any<long>()).Returns((Group)null);
+            this.groupRepository.GetById(Arg.Any<long>()).Returns((Group)null);
 
             // Act & Assert
-            var ex = Assert.Throws<Exception>(() =>
-                this.service.ValidateUpdate(1, "Name", "Desc", "img.jpg", 1));
-            Assert.That(ex.Message, Is.EqualTo("Group does not exist"));
+            var exception = Assert.Throws<Exception>(() =>
+                this.service.UpdateUser(1, "Name", "Desc", "img.jpg", 1));
+            Assert.That(exception.Message, Is.EqualTo("Group does not exist"));
         }
 
         [Test]
-        public void ValidateUpdate_WithNonexistentAdmin_ThrowsException()
+        public void UpdateUser_WithNonexistentAdmin_ThrowsException()
         {
             // Arrange
-            this.groupRepo.GetById(Arg.Any<long>()).Returns(this.CreateTestGroup());
-            this.userRepo.GetById(Arg.Any<long>()).Returns((User)null);
+            this.groupRepository.GetById(Arg.Any<long>()).Returns(this.CreateTestGroup());
+            this.userRepository.GetById(Arg.Any<long>()).Returns((User)null);
 
             // Act & Assert
-            var ex = Assert.Throws<Exception>(() =>
-                this.service.ValidateUpdate(1, "Name", "Desc", "img.jpg", 1));
-            Assert.That(ex.Message, Is.EqualTo("User does not exist"));
+            var exception = Assert.Throws<Exception>(() =>
+                this.service.UpdateUser(1, "Name", "Desc", "img.jpg", 1));
+            Assert.That(exception.Message, Is.EqualTo("User does not exist"));
         }
 
         [Test]
-        public void ValidateUpdate_WithEmptyName_ThrowsException()
+        public void UpdateUser_WithEmptyName_ThrowsException()
         {
             // Arrange
-            this.groupRepo.GetById(Arg.Any<long>()).Returns(CreateTestGroup());
-            this.userRepo.GetById(Arg.Any<long>()).Returns(CreateTestUser());
+            this.groupRepository.GetById(Arg.Any<long>()).Returns(this.CreateTestGroup());
+            this.userRepository.GetById(Arg.Any<long>()).Returns(this.CreateTestUser());
 
             // Act & Assert
-            var ex = Assert.Throws<Exception>(() =>
-                this.service.ValidateUpdate(1, "", "Desc", "img.jpg", 1));
-            Assert.That(ex.Message, Is.EqualTo("Group name cannot be empty"));
+            var exception = Assert.Throws<Exception>(() =>
+                this.service.UpdateUser(1, " ", "Desc", "img.jpg", 1));
+            Assert.That(exception.Message, Is.EqualTo("Group name cannot be empty"));
         }
 
         [Test]
@@ -108,7 +108,7 @@
                 this.CreateTestGroup(1),
                 this.CreateTestGroup(2),
             };
-            this.groupRepo.GetAll().Returns(expectedGroups);
+            this.groupRepository.GetAll().Returns(expectedGroups);
 
             // Act
             var result = this.service.GetAll();
@@ -122,7 +122,7 @@
         {
             // Arrange
             var expectedGroup = this.CreateTestGroup();
-            this.groupRepo.GetById(1).Returns(expectedGroup);
+            this.groupRepository.GetById(1).Returns(expectedGroup);
 
             // Act
             var result = this.service.GetById(1);
@@ -140,7 +140,7 @@
                 this.CreateTestUser(1),
                 this.CreateTestUser(2),
             };
-            this.groupRepo.GetUsersFromGroup(1).Returns(expectedUsers);
+            this.groupRepository.GetUsersFromGroup(1).Returns(expectedUsers);
 
             // Act
             var result = this.service.GetUsersFromGroup(1);
@@ -158,7 +158,7 @@
                 this.CreateTestGroup(1),
                 this.CreateTestGroup(2),
             };
-            this.groupRepo.GetGroupsForUser(1).Returns(expectedGroups);
+            this.groupRepository.GetGroupsForUser(1).Returns(expectedGroups);
 
             // Act
             var result = this.service.GetGroupsForUser(1);
