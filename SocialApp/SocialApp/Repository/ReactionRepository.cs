@@ -1,82 +1,78 @@
-﻿using Microsoft.Data.SqlClient;
-using SocialApp.Entities;
-using SocialApp.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SocialApp.Repository
+﻿namespace SocialApp.Repository
 {
+    using System.Collections.Generic;
+    using Microsoft.Data.SqlClient;
+    using SocialApp.Entities;
+    using SocialApp.Enums;
+
     public class ReactionRepository : IReactionRepository
     {
-
         private string loginString = "Data Source=vm;" +
     "Initial Catalog=team_babes;" +
     "Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
+
         private SqlConnection connection;
 
         public ReactionRepository()
         {
-            this.connection = new SqlConnection(loginString);
+            this.connection = new SqlConnection(this.loginString);
         }
 
-        public List<Reaction> GetAll()
+        public List<Reaction> GetAllReactions()
         {
-            connection.Open();
-            List<Reaction> reactions = new List<Reaction>();
+            this.connection.Open();
+            List<Reaction> reactions = [];
 
-            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Reactions", connection);
+            SqlCommand selectCommand = new ("SELECT * FROM Reactions", this.connection);
             SqlDataReader reader = selectCommand.ExecuteReader();
             while (reader.Read())
             {
-                Reaction reaction = new Reaction
+                Reaction reaction = new ()
                 {
                     UserId = reader.GetInt64(reader.GetOrdinal("UserId")),
                     PostId = reader.GetInt64(reader.GetOrdinal("PostId")),
-                    Type = (ReactionType)reader.GetInt32(reader.GetOrdinal("Type"))
+                    Type = (ReactionType)reader.GetInt32(reader.GetOrdinal("Type")),
                 };
                 reactions.Add(reaction);
             }
 
             reader.Close();
-            connection.Close();
+            this.connection.Close();
             return reactions;
         }
 
-        public List<Reaction> GetByPost(long postId)
+        public List<Reaction> GetReactionsByPost(long postId)
         {
-            connection.Open();
+            this.connection.Open();
 
-            List<Reaction> reactions = new List<Reaction>();
-            SqlCommand selectCommand = new SqlCommand(
+            List<Reaction> reactions = [];
+            SqlCommand selectCommand = new (
                 "SELECT * FROM Reactions WHERE PostId = @PostId",
-                connection
-            );
+                this.connection);
             selectCommand.Parameters.AddWithValue("@PostId", postId);
             SqlDataReader reader = selectCommand.ExecuteReader();
             while (reader.Read())
             {
-                Reaction reaction = new Reaction
+                Reaction reaction = new ()
                 {
                     UserId = reader.IsDBNull(reader.GetOrdinal("UserId")) ? 0 : reader.GetInt64(reader.GetOrdinal("UserId")),
                     PostId = reader.IsDBNull(reader.GetOrdinal("PostId")) ? 0 : reader.GetInt64(reader.GetOrdinal("PostId")),
-                    Type = reader.IsDBNull(reader.GetOrdinal("ReactionType")) ? ReactionType.Like : (ReactionType)reader.GetInt32(reader.GetOrdinal("ReactionType"))
+                    Type = reader.IsDBNull(reader.GetOrdinal("ReactionType")) ? ReactionType.Like : (ReactionType)reader.GetInt32(reader.GetOrdinal("ReactionType")),
                 };
                 reactions.Add(reaction);
             }
+
             reader.Close();
-            connection.Close();
+            this.connection.Close();
             return reactions;
         }
 
-        public Reaction GetByUserAndPost(long userId, long postId)
+        public Reaction? GetReactionByUserAndPost(long userId, long postId)
         {
-            connection.Open();
-            Reaction reaction = null;
+            this.connection.Open();
+            Reaction? reaction = null;
 
-            SqlCommand selectCommand = new SqlCommand("SELECT * FROM Reactions WHERE UserId = @UserId AND PostId = @PostId", connection);
+            SqlCommand selectCommand = new ("SELECT * FROM Reactions WHERE UserId = @UserId AND PostId = @PostId", this.connection);
             selectCommand.Parameters.AddWithValue("@UserId", userId);
             selectCommand.Parameters.AddWithValue("@PostId", postId);
 
@@ -87,59 +83,57 @@ namespace SocialApp.Repository
                 {
                     UserId = reader.GetInt64(reader.GetOrdinal("UserId")),
                     PostId = reader.GetInt64(reader.GetOrdinal("PostId")),
-                    Type = (ReactionType)reader.GetInt32(reader.GetOrdinal("ReactionType"))
+                    Type = (ReactionType)reader.GetInt32(reader.GetOrdinal("ReactionType")),
                 };
             }
 
             reader.Close();
-            connection.Close();
+            this.connection.Close();
             return reaction;
         }
 
         public void Save(Reaction entity)
         {
-            connection.Open();
+            this.connection.Open();
 
-            SqlCommand insertCommand = new SqlCommand(
+            SqlCommand insertCommand = new (
                 "INSERT INTO Reactions (UserId, PostId, ReactionType) VALUES (@UserId, @PostId, @Type)",
-                connection
-            );
+                this.connection);
             insertCommand.Parameters.AddWithValue("@UserId", entity.UserId);
             insertCommand.Parameters.AddWithValue("@PostId", entity.PostId);
             insertCommand.Parameters.AddWithValue("@Type", (int)entity.Type);
 
             insertCommand.ExecuteNonQuery();
 
-            connection.Close();
+            this.connection.Close();
         }
 
         public void UpdateByUserAndPost(long userId, long postId, ReactionType type)
         {
-            connection.Open();
+            this.connection.Open();
 
-            SqlCommand updateCommand = new SqlCommand(
+            SqlCommand updateCommand = new (
                 "UPDATE Reactions SET ReactionType = @Type WHERE UserId = @UserId AND PostId = @PostId",
-                connection
-            );
+                this.connection);
 
             updateCommand.Parameters.AddWithValue("@UserId", userId);
             updateCommand.Parameters.AddWithValue("@PostId", postId);
             updateCommand.Parameters.AddWithValue("@Type", (int)type);
             updateCommand.ExecuteNonQuery();
 
-            connection.Close();
+            this.connection.Close();
         }
 
         public void DeleteByUserAndPost(long userId, long postId)
         {
-            connection.Open();
+            this.connection.Open();
 
-            SqlCommand deleteCommand = new SqlCommand("DELETE FROM Reactions WHERE UserId = @UserId AND PostId = @PostId", connection);
+            SqlCommand deleteCommand = new SqlCommand("DELETE FROM Reactions WHERE UserId = @UserId AND PostId = @PostId", this.connection);
             deleteCommand.Parameters.AddWithValue("@UserId", userId);
             deleteCommand.Parameters.AddWithValue("@PostId", postId);
             deleteCommand.ExecuteNonQuery();
 
-            connection.Close();
+            this.connection.Close();
         }
     }
 }

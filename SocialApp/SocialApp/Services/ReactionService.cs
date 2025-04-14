@@ -8,12 +8,12 @@
 
     public class ReactionService(IReactionRepository reactionRepository) : IReactionService
     {
-        public Reaction ValidateAdd(long userId, long postId, ReactionType type)
+        public Reaction AddReaction_byUserAndPost(long userId, long postId, ReactionType type)
         {
-            if (reactionRepository.GetByUserAndPost(userId, postId) != null)
+            if (reactionRepository.GetReactionByUserAndPost(userId, postId) != null)
             {
                 reactionRepository.UpdateByUserAndPost(userId, postId, type);
-                return reactionRepository.GetByUserAndPost(userId, postId);
+                return reactionRepository.GetReactionByUserAndPost(userId, postId);
             }
 
             Reaction reaction = new Reaction() { UserId = userId, PostId = postId, Type = type };
@@ -21,9 +21,9 @@
             return reaction;
         }
 
-        public void ValidateDelete(long userId, long postId)
+        public void DeleteReaction_byUserAndPost(long userId, long postId)
         {
-            Reaction reaction = reactionRepository.GetByUserAndPost(userId, postId);
+            Reaction reaction = reactionRepository.GetReactionByUserAndPost(userId, postId);
             if (reaction == null)
             {
                 throw new Exception("Reaction does not exist");
@@ -32,14 +32,14 @@
             reactionRepository.DeleteByUserAndPost(userId, postId);
         }
 
-        public List<Reaction> GetAll()
+        public List<Reaction> GetAllReactions()
         {
-            return reactionRepository.GetAll();
+            return reactionRepository.GetAllReactions();
         }
 
         public List<Reaction> GetReactionsForPost(long postId)
         {
-            return reactionRepository.GetByPost(postId);
+            return reactionRepository.GetReactionsByPost(postId);
         }
     }
 }

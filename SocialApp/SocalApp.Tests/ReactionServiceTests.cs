@@ -28,10 +28,10 @@ namespace SocialApp.Tests
         }
 
         /// <summary>
-        /// Validates that ValidateAdd updates the reaction if one already exists.
+        /// Validates that AddReaction_byUserAndPost updates the reaction if one already exists.
         /// </summary>
         [Test]
-        public void ValidateAdd_ReactionExists_UpdatesReaction()
+        public void AddReaction_byUserAndPost_ReactionExists_UpdatesReaction()
         {
             // Arrange
             long userId = 1;
@@ -39,32 +39,32 @@ namespace SocialApp.Tests
             ReactionType newType = ReactionType.Like;
 
             var existingReaction = new Reaction { UserId = userId, PostId = postId, Type = ReactionType.Like };
-            this.reactionRepository.GetByUserAndPost(userId, postId).Returns(existingReaction);
+            this.reactionRepository.GetReactionByUserAndPost(userId, postId).Returns(existingReaction);
 
             // Act
-            var result = this.reactionService.ValidateAdd(userId, postId, newType);
+            var result = this.reactionService.AddReaction_byUserAndPost(userId, postId, newType);
 
             // Assert
             this.reactionRepository.Received(1).UpdateByUserAndPost(userId, postId, newType);
-            this.reactionRepository.Received(2).GetByUserAndPost(userId, postId); // once before, once after update
+            this.reactionRepository.Received(2).GetReactionByUserAndPost(userId, postId); // once before, once after update
             Assert.That(result, Is.EqualTo(existingReaction));
         }
 
         /// <summary>
-        /// Validates that ValidateAdd adds a new reaction if one does not exist.
+        /// Validates that AddReaction_byUserAndPost adds a new reaction if one does not exist.
         /// </summary>
         [Test]
-        public void ValidateAdd_ReactionDoesNotExist_CreatesReaction()
+        public void AddReaction_byUserAndPost_ReactionDoesNotExist_CreatesReaction()
         {
             // Arrange
             long userId = 1;
             long postId = 10;
             ReactionType type = ReactionType.Love;
 
-            this.reactionRepository.GetByUserAndPost(userId, postId).Returns(null as Reaction);
+            this.reactionRepository.GetReactionByUserAndPost(userId, postId).Returns(null as Reaction);
 
             // Act
-            var result = this.reactionService.ValidateAdd(userId, postId, type);
+            var result = this.reactionService.AddReaction_byUserAndPost(userId, postId, type);
 
             // Assert
             this.reactionRepository.Received(1).Save(Arg.Is<Reaction>(r =>
@@ -76,46 +76,46 @@ namespace SocialApp.Tests
         }
 
         /// <summary>
-        /// Validates that ValidateDelete throws an exception if the reaction does not exist.
+        /// Validates that DeleteReaction_byUserAndPost throws an exception if the reaction does not exist.
         /// </summary>
         [Test]
-        public void ValidateDelete_ReactionDoesNotExist_ThrowsException()
+        public void DeleteReaction_byUserAndPost_ReactionDoesNotExist_ThrowsException()
         {
             // Arrange
             long userId = 1;
             long postId = 10;
 
-            this.reactionRepository.GetByUserAndPost(userId, postId).Returns(null as Reaction);
+            this.reactionRepository.GetReactionByUserAndPost(userId, postId).Returns(null as Reaction);
 
             // Act & Assert
-            var ex = Assert.Throws<Exception>(() => this.reactionService.ValidateDelete(userId, postId));
+            var ex = Assert.Throws<Exception>(() => this.reactionService.DeleteReaction_byUserAndPost(userId, postId));
             Assert.That(ex.Message, Is.EqualTo("Reaction does not exist"));
         }
 
         /// <summary>
-        /// Validates that ValidateDelete deletes the reaction if it exists.
+        /// Validates that DeleteReaction_byUserAndPost deletes the reaction if it exists.
         /// </summary>
         [Test]
-        public void ValidateDelete_ReactionExists_DeletesReaction()
+        public void DeleteReaction_byUserAndPost_ReactionExists_DeletesReaction()
         {
             // Arrange
             long userId = 1;
             long postId = 10;
 
-            this.reactionRepository.GetByUserAndPost(userId, postId).Returns(new Reaction { UserId = userId, PostId = postId });
+            this.reactionRepository.GetReactionByUserAndPost(userId, postId).Returns(new Reaction { UserId = userId, PostId = postId });
 
             // Act
-            this.reactionService.ValidateDelete(userId, postId);
+            this.reactionService.DeleteReaction_byUserAndPost(userId, postId);
 
             // Assert
             this.reactionRepository.Received(1).DeleteByUserAndPost(userId, postId);
         }
 
         /// <summary>
-        /// Validates that GetAll returns all reactions.
+        /// Validates that GetAllReactions returns all reactions.
         /// </summary>
         [Test]
-        public void GetAll_ReturnsAllReactions()
+        public void GetAllReactions_ReturnsAllReactions()
         {
             // Arrange
             var reactions = new List<Reaction>
@@ -123,10 +123,10 @@ namespace SocialApp.Tests
                 new Reaction { UserId = 1, PostId = 1, Type = ReactionType.Like },
                 new Reaction { UserId = 2, PostId = 2, Type = ReactionType.Anger },
             };
-            this.reactionRepository.GetAll().Returns(reactions);
+            this.reactionRepository.GetAllReactions().Returns(reactions);
 
             // Act
-            var result = this.reactionService.GetAll();
+            var result = this.reactionService.GetAllReactions();
 
             // Assert
             Assert.That(result, Is.EqualTo(reactions));
@@ -145,7 +145,7 @@ namespace SocialApp.Tests
                 new Reaction { UserId = 1, PostId = postId, Type = ReactionType.Like },
                 new Reaction { UserId = 2, PostId = postId, Type = ReactionType.Love },
             };
-            this.reactionRepository.GetByPost(postId).Returns(reactions);
+            this.reactionRepository.GetReactionsByPost(postId).Returns(reactions);
 
             // Act
             var result = this.reactionService.GetReactionsForPost(postId);

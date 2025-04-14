@@ -6,12 +6,12 @@ namespace SocialApp.Services
 {
     public interface IReactionService
     {
-        List<Reaction> GetAll();
+        List<Reaction> GetAllReactions();
 
         List<Reaction> GetReactionsForPost(long postId);
 
-        Reaction ValidateAdd(long userId, long postId, ReactionType type);
+        Reaction AddReaction_byUserAndPost(long userId, long postId, ReactionType type);
 
-        void ValidateDelete(long userId, long postId);
+        void DeleteReaction_byUserAndPost(long userId, long postId);
     }
 }

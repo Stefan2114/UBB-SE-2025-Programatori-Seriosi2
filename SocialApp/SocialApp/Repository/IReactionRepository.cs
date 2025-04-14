@@ -20,14 +20,14 @@
         /// Retrieves all reactions.
         /// </summary>
         /// <returns>A list of all reactions.</returns>
-        List<Reaction> GetAll();
+        List<Reaction> GetAllReactions();
 
         /// <summary>
         /// Retrieves all reactions for a specific post.
         /// </summary>
         /// <param name="postId">The ID of the post.</param>
         /// <returns>A list of reactions for the specified post.</returns>
-        List<Reaction> GetByPost(long postId);
+        List<Reaction> GetReactionsByPost(long postId);
 
         /// <summary>
         /// Retrieves a reaction by a specific user for a specific post.
@@ -35,7 +35,7 @@
         /// <param name="userId">The ID of the user.</param>
         /// <param name="postId">The ID of the post.</param>
         /// <returns>The reaction for the specified user and post.</returns>
-        Reaction GetByUserAndPost(long userId, long postId);
+        Reaction GetReactionByUserAndPost(long userId, long postId);
 
         /// <summary>
         /// Saves a new reaction to the repository.
