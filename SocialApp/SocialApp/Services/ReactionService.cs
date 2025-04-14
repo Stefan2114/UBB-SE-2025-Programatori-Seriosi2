@@ -1,52 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SocialApp.Entities;
-using SocialApp.Enums;
-using SocialApp.Repository;
-
-namespace SocialApp.Services
+﻿namespace SocialApp.Services
 {
-    public class ReactionService : IReactionService
+    using System;
+    using System.Collections.Generic;
+    using SocialApp.Entities;
+    using SocialApp.Enums;
+    using SocialApp.Repository;
+
+    public class ReactionService(IReactionRepository reactionRepository) : IReactionService
     {
-        private IReactionRepository ReactionRepository;
-
-        public ReactionService(IReactionRepository reactionRepository)
+        public Reaction AddReaction_byUserAndPost(long userId, long postId, ReactionType type)
         {
-            this.ReactionRepository = reactionRepository;
-        }
-
-        public Reaction ValidateAdd(long userId, long postId, ReactionType type)
-        {
-            if (ReactionRepository.GetByUserAndPost(userId, postId) != null)
+            if (reactionRepository.GetReactionByUserAndPost(userId, postId) != null)
             {
-                ReactionRepository.UpdateByUserAndPost(userId, postId, type);
-                return ReactionRepository.GetByUserAndPost(userId, postId);
+                reactionRepository.UpdateByUserAndPost(userId, postId, type);
+                return reactionRepository.GetReactionByUserAndPost(userId, postId);
             }
+
             Reaction reaction = new Reaction() { UserId = userId, PostId = postId, Type = type };
-            ReactionRepository.Save(reaction);
+            reactionRepository.Save(reaction);
             return reaction;
         }
 
-        public void ValidateDelete(long userId, long postId)
+        public void DeleteReaction_byUserAndPost(long userId, long postId)
         {
-            Reaction reaction = ReactionRepository.GetByUserAndPost(userId, postId);
+            Reaction reaction = reactionRepository.GetReactionByUserAndPost(userId, postId);
             if (reaction == null)
             {
                 throw new Exception("Reaction does not exist");
             }
-            ReactionRepository.DeleteByUserAndPost(userId, postId);
+
+            reactionRepository.DeleteByUserAndPost(userId, postId);
         }
-        public List<Reaction> GetAll()
+
+        public List<Reaction> GetAllReactions()
         {
-            return ReactionRepository.GetAll();
+            return reactionRepository.GetAllReactions();
         }
 
         public List<Reaction> GetReactionsForPost(long postId)
         {
-            return ReactionRepository.GetByPost(postId);
+            return reactionRepository.GetReactionsByPost(postId);
         }
     }
 }
