@@ -73,7 +73,7 @@ namespace SocialApp.Services
         /// </summary>
         /// <param name="commentId">The ID of the comment to be deleted.</param>
         /// <exception cref="InvalidOperationException">Thrown when the comment does not exist.</exception>
-        public void ValidateDelete(long commentId)
+        public void DeleteComment(long commentId)
         {
             if (commentRepository.GetById(commentId) == null)
             {

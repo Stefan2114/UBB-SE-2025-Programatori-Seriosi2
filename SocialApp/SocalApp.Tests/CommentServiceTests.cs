@@ -122,52 +122,52 @@ namespace SocialApp.Tests
             postRepository.Received(1).GetById(invalidPostId);
         }
 
-        ///// <summary>
-        ///// Validates that the ValidateDelete method successfully deletes a comment when provided with a valid comment ID.
-        ///// </summary>
-        //[Test]
-        //public void ValidateDelete_WithValidCommentId_SuccessfullyDeletes()
-        //{
-        //    // Arrange
-        //    var commentRepository = Substitute.For<ICommentRepository>();
-        //    var postRepository = Substitute.For<IPostRepository>();
-        //    var userRepository = Substitute.For<IUserRepository>();
+        /// <summary>
+        /// Validates that the ValidateDelete method successfully deletes a comment when provided with a valid comment ID.
+        /// </summary>
+        [Test]
+        public void TestDeleteCommentValid()
+        {
+            // Arrange
+            var commentRepository = Substitute.For<ICommentRepository>();
+            var postRepository = Substitute.For<IPostRepository>();
+            var userRepository = Substitute.For<IUserRepository>();
 
-        //    var commentService = new CommentService(commentRepository, postRepository, userRepository);
+            var commentService = new CommentService(commentRepository, postRepository, userRepository);
 
-        //    long commentId = 1;
-        //    var comment = new Comment { Id = commentId, Content = "Test Content", CreatedDate = DateTime.Now, UserId = 1, PostId = 2 };
+            long commentId = 1;
+            var comment = new Comment { Id = commentId, Content = "Test Content", CreatedDate = DateTime.Now, UserId = 1, PostId = 2 };
 
-        //    commentRepository.GetById(commentId).Returns(comment);
+            commentRepository.GetById(commentId).Returns(comment);
 
-        //    // Act
-        //    commentService.ValidateDelete(commentId);
+            // Act
+            commentService.DeleteComment(commentId);
 
-        //    // Assert
-        //    commentRepository.Received(1).DeleteById(commentId);
-        //}
+            // Assert
+            commentRepository.Received(1).DeleteById(commentId);
+        }
 
-        ///// <summary>
-        ///// Validates that the ValidateDelete method throws an exception when the comment does not exist.
-        ///// </summary>
-        //[Test]
-        //public void ValidateDelete_WithInvalidCommentId_ThrowsException()
-        //{
-        //    // Arrange
-        //    var commentRepository = Substitute.For<ICommentRepository>();
-        //    var postRepository = Substitute.For<IPostRepository>();
-        //    var userRepository = Substitute.For<IUserRepository>();
+        /// <summary>
+        /// Validates that the ValidateDelete method throws an exception when the comment does not exist.
+        /// </summary>
+        [Test]
+        public void TestDeleteCommentInvalid()
+        {
+            // Arrange
+            var commentRepository = Substitute.For<ICommentRepository>();
+            var postRepository = Substitute.For<IPostRepository>();
+            var userRepository = Substitute.For<IUserRepository>();
 
-        //    var commentService = new CommentService(commentRepository, postRepository, userRepository);
+            var commentService = new CommentService(commentRepository, postRepository, userRepository);
 
-        //    long invalidCommentId = 999;
+            long invalidCommentId = 999;
 
-        //    commentRepository.GetById(invalidCommentId).Returns((Comment)null);
+            commentRepository.GetById(invalidCommentId).Returns((Comment)null);
 
-        //    // Act & Assert
-        //    var ex = Assert.Throws<InvalidOperationException>(() => commentService.ValidateDelete(invalidCommentId));
-        //    Assert.That(ex.Message, Is.EqualTo($"Comment with ID {invalidCommentId} does not exist."));
-        //    commentRepository.Received(1).GetById(invalidCommentId);
-        //}
+            // Act & Assert
+            var ex = Assert.Throws<InvalidOperationException>(() => commentService.DeleteComment(invalidCommentId));
+            Assert.That(ex.Message, Is.EqualTo($"Comment with ID {invalidCommentId} does not exist."));
+            commentRepository.Received(1).GetById(invalidCommentId);
+        }
     }
 }
