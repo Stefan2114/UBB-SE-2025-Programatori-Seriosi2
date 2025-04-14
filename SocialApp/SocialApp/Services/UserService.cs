@@ -1,7 +1,3 @@
-﻿// <copyright file="UserService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace SocialApp.Services
 {
     using System;
@@ -15,6 +11,7 @@ namespace SocialApp.Services
     /// <summary>
     /// Provides user-related services.
     /// </summary>
+
     public class UserService : IUserService
     {
         private IUserRepository userRepository;
@@ -135,7 +132,7 @@ namespace SocialApp.Services
         /// <param name="userId">The user ID.</param>
         /// <param name="whoToFollowId">The ID of the user to follow.</param>
         /// <exception cref="Exception">Thrown when the user or the user to follow does not exist.</exception>
-        public void FollowUserById(long userId, long whoToFollowId)
+        public void FollowUserById(long userId, long whoToFollowId
         {
             if (this.userRepository.GetById(userId) == null)
             {
@@ -156,7 +153,7 @@ namespace SocialApp.Services
         /// <param name="userId">The user ID.</param>
         /// <param name="whoToUnfollowId">The ID of the user to unfollow.</param>
         /// <exception cref="Exception">Thrown when the user or the user to unfollow does not exist.</exception>
-        public void UnfollowUserById(long userId, long whoToUnfollowId)
+        public void UnfollowUserById(long userId, long whoToUnfollowId
         {
             if (this.userRepository.GetById(userId) == null)
             {
