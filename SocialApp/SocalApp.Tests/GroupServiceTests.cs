@@ -46,7 +46,7 @@ namespace SocialApp.Tests
         }
 
         [Test]
-        public void addGroup_WithValidData_CreatesGroup()
+        public void AddGroup_WithValidData_CreatesGroup()
         {
             // Arrange
             var adminId = 1L;
@@ -62,7 +62,7 @@ namespace SocialApp.Tests
             this.groupRepository.When(x => x.SaveGroup(Arg.Do<Group>(g => savedGroup = g)));
 
             // Act
-            var result = this.service.addGroup(name, desc, image, adminId);
+            var result = this.service.AddGroup(name, desc, image, adminId);
 
             // Assert
             Assert.NotNull(result);
@@ -73,51 +73,51 @@ namespace SocialApp.Tests
         }
 
         [Test]
-        public void addGroup_WithEmptyName_ThrowsException()
+        public void AddGroup_WithEmptyName_ThrowsException()
         {
             // Arrange
             var adminId = 1L;
 
             // Act & Assert
             var ex = Assert.Throws<Exception>(() =>
-                this.service.addGroup("", "desc", "img.jpg", adminId));
+                this.service.AddGroup("", "desc", "img.jpg", adminId));
             Assert.That(ex.Message, Is.EqualTo("Group name cannot be empty"));
         }
 
         [Test]
-        public void addGroup_WithNonexistentAdmin_ThrowsException()
+        public void AddGroup_WithNonexistentAdmin_ThrowsException()
         {
             // Arrange
             this.userRepository.GetById(Arg.Any<long>()).Returns((User)null);
 
             // Act & Assert
             var ex = Assert.Throws<Exception>(() =>
-                this.service.addGroup("Name", "Desc", "img.jpg", 999));
+                this.service.AddGroup("Name", "Desc", "img.jpg", 999));
             Assert.That(ex.Message, Is.EqualTo("User does not exist"));
         }
 
         [Test]
-        public void deleteGroup_WithExistingGroup_DeletesGroup()
+        public void DeleteGroup_WithExistingGroup_DeletesGroup()
         {
             // Arrange
             var groupId = 1L;
             this.groupRepository.GetById(groupId).Returns(this.CreateTestGroup());
 
             // Act
-            this.service.deleteGroup(groupId);
+            this.service.DeleteGroup(groupId);
 
             // Assert
             this.groupRepository.Received(1).DeleteById(groupId);
         }
 
         [Test]
-        public void deleteGroup_WithNonexistentGroup_ThrowsException()
+        public void DeleteGroup_WithNonexistentGroup_ThrowsException()
         {
             // Arrange
             this.groupRepository.GetById(Arg.Any<long>()).Returns((Group)null);
 
             // Act & Assert
-            var ex = Assert.Throws<Exception>(() => this.service.deleteGroup(123));
+            var ex = Assert.Throws<Exception>(() => this.service.DeleteGroup(123));
             Assert.That(ex.Message, Is.EqualTo("Group does not exist"));
         }
 
