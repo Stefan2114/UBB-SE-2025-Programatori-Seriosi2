@@ -51,7 +51,7 @@ namespace SocialApp.Tests
             // Arrange
             var adminId = 1L;
             var name = "New Group";
-            var desc = "A description";
+            var description = "A description";
             var image = "group.jpg";
 
             this.userRepository.GetById(adminId).Returns(this.CreateTestUser());
@@ -62,12 +62,12 @@ namespace SocialApp.Tests
             this.groupRepository.When(x => x.SaveGroup(Arg.Do<Group>(g => savedGroup = g)));
 
             // Act
-            var result = this.service.AddGroup(name, desc, image, adminId);
+            var result = this.service.AddGroup(name, description, image, adminId);
 
             // Assert
             Assert.NotNull(result);
             Assert.AreEqual(name, result.Name);
-            Assert.AreEqual(desc, result.Description);
+            Assert.AreEqual(description, result.Description);
             Assert.AreEqual(image, result.Image);
             Assert.AreEqual(adminId, result.AdminId);
         }
@@ -80,7 +80,7 @@ namespace SocialApp.Tests
 
             // Act & Assert
             var ex = Assert.Throws<Exception>(() =>
-                this.service.AddGroup("", "desc", "img.jpg", adminId));
+                this.service.AddGroup("", "description", "img.jpg", adminId));
             Assert.That(ex.Message, Is.EqualTo("Group name cannot be empty"));
         }
 
@@ -92,7 +92,7 @@ namespace SocialApp.Tests
 
             // Act & Assert
             var ex = Assert.Throws<Exception>(() =>
-                this.service.AddGroup("Name", "Desc", "img.jpg", 999));
+                this.service.AddGroup("Name", "Description", "img.jpg", 999));
             Assert.That(ex.Message, Is.EqualTo("User does not exist"));
         }
 
@@ -131,10 +131,10 @@ namespace SocialApp.Tests
             this.userRepository.GetById(adminId).Returns(this.CreateTestUser());
 
             // Act
-            this.service.UpdateUser(groupId, "New Name", "New Desc", "new.jpg", adminId);
+            this.service.UpdateUser(groupId, "New Name", "New Description", "new.jpg", adminId);
 
             // Assert
-            this.groupRepository.Received(1).UpdateById(groupId, "New Name", "new.jpg", "New Desc", adminId);
+            this.groupRepository.Received(1).UpdateById(groupId, "New Name", "new.jpg", "New Description", adminId);
         }
 
         [Test]
@@ -145,7 +145,7 @@ namespace SocialApp.Tests
 
             // Act & Assert
             var exception = Assert.Throws<Exception>(() =>
-                this.service.UpdateUser(1, "Name", "Desc", "img.jpg", 1));
+                this.service.UpdateUser(1, "Name", "Description", "img.jpg", 1));
             Assert.That(exception.Message, Is.EqualTo("Group does not exist"));
         }
 
@@ -158,7 +158,7 @@ namespace SocialApp.Tests
 
             // Act & Assert
             var exception = Assert.Throws<Exception>(() =>
-                this.service.UpdateUser(1, "Name", "Desc", "img.jpg", 1));
+                this.service.UpdateUser(1, "Name", "Description", "img.jpg", 1));
             Assert.That(exception.Message, Is.EqualTo("User does not exist"));
         }
 
@@ -171,7 +171,7 @@ namespace SocialApp.Tests
 
             // Act & Assert
             var exception = Assert.Throws<Exception>(() =>
-                this.service.UpdateUser(1, " ", "Desc", "img.jpg", 1));
+                this.service.UpdateUser(1, " ", "Description", "img.jpg", 1));
             Assert.That(exception.Message, Is.EqualTo("Group name cannot be empty"));
         }
 

@@ -17,7 +17,7 @@
             this.userRepository = userRepository;
         }
 
-        public Group addGroup(string name, string desc, string image, long adminId)
+        public Group AddGroup(string name, string description, string image, long adminId)
         {
             if (name == null || name.Length == 0)
             {
@@ -29,13 +29,13 @@
                 throw new Exception("User does not exist");
             }
 
-            Group group = new Group() { Name = name, AdminId = adminId, Image = image, Description = desc };
+            Group group = new Group() { Name = name, AdminId = adminId, Image = image, Description = description };
 
             GroupRepository.SaveGroup(group);
             return group;
         }
 
-        public void deleteGroup(long groupId)
+        public void DeleteGroup(long groupId)
         {
             if (this.groupRepository.GetById(groupId) == null)
                 throw new Exception("Group does not exist");
@@ -43,7 +43,7 @@
             this.groupRepository.DeleteById(groupId);
         }
 
-        public void UpdateUser(long id, string name, string desc, string image, long adminId)
+        public void UpdateUser(long id, string name, string description, string image, long adminId)
         {
             if (this.groupRepository.GetById(id) == null)
             {
@@ -60,7 +60,7 @@
                 throw new Exception("Group name cannot be empty");
             }
 
-            this.groupRepository.UpdateById(id, name, image, desc, adminId);
+            this.groupRepository.UpdateById(id, name, image, description, adminId);
         }
 
         public List<Group> GetAll()
