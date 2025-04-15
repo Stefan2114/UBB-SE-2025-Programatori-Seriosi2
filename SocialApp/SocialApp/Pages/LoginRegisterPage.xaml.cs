@@ -51,17 +51,17 @@ namespace SocialApp.Pages
         /// <param name="e">
         /// the event data.
         /// </param>
-        public void ContinueClick(object sender, RoutedEventArgs e)
-        {
-            if (this.controller.EmailExists(this.EmailTextbox.Text))
-            {
-                this.LoginFlow();
-            }
-            else
-            {
-                this.RegisterFlow();
-            }
-        }
+        //public void ContinueClick(object sender, RoutedEventArgs e)
+        //{
+        //    if (this.controller.EmailExists(this.EmailTextbox.Text))
+        //    {
+        //        this.LoginFlow();
+        //    }
+        //    else
+        //    {
+        //        this.RegisterFlow();
+        //    }
+        //}
 
         /// <summary>
         /// Handles the navigation to this page.
@@ -156,15 +156,15 @@ namespace SocialApp.Pages
         private void OnLoginClicked(object sender, RoutedEventArgs e)
         {
 
-            if (!this.controller.Login(this.EmailTextbox.Text, this.PasswordTextbox.Password)) // Use Password property
+            if (!this.appController.Login(this.EmailTextbox.Text, this.PasswordTextbox.Password)) // Use Password property
             {
-                this.ErrorTextbox.Visibility = Visible;
+                this.ErrorTextbox.Visibility = VisibleVisibility;
                 this.ErrorTextbox.Text = "Incorrect password.";
                 this.PasswordTextbox.Password = string.Empty;
             }
             else
             {
-                this.Frame.Navigate(typeof(HomeScreen), this.controller);
+                this.Frame.Navigate(typeof(HomeScreen), this.appController);
             }
         }
 
@@ -260,9 +260,9 @@ namespace SocialApp.Pages
             try
             {
 
-                this.PasswordsMatch(this.PasswordTextbox.Password, this.ConfirmPasswordTextbox.Password); // Use Password property
-                this.AreTermAccepted();
-                this.Register();
+                ValidatePasswordMatch(this.PasswordTextbox.Password, this.ConfirmPasswordTextbox.Password); // Use Password property
+                ValidateTermsAcceptance();
+                CompleteRegistration();
             }
             catch (Exception exception)
             {
@@ -287,13 +287,13 @@ namespace SocialApp.Pages
             }
         }
 
-        private void CompleteRegistration()
+        private void CompleteRegistration() 
         {
             try
             {
 
-                this.controller.Register(this.UsernameTextbox.Text, this.EmailTextbox.Text, this.PasswordTextbox.Password, this.image); // Use Password property
-                this.Frame.Navigate(typeof(HomeScreen), this.controller);
+                this.appController.Register(this.UsernameTextbox.Text, this.EmailTextbox.Text, this.PasswordTextbox.Password, this.profileImage); // Use Password property
+                this.Frame.Navigate(typeof(HomeScreen), this.appController);
             }
             catch (Exception exception)
             {

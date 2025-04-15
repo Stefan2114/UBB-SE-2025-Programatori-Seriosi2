@@ -136,7 +136,7 @@ namespace SocialApp.Components
         {
             if(AppController.CurrentUser != null)
             {
-                reactionService.ValidateAdd(AppController.CurrentUser.Id, postId, ReactionType.Like);
+                reactionService.AddReaction(AppController.CurrentUser.Id, postId, ReactionType.Like);
                 LoadReactionCounts();
             }
 
@@ -146,7 +146,7 @@ namespace SocialApp.Components
         {
             if (AppController.CurrentUser != null)
             {
-                reactionService.ValidateAdd(AppController.CurrentUser.Id, postId, ReactionType.Love);
+                reactionService.AddReaction(AppController.CurrentUser.Id, postId, ReactionType.Love);
                 LoadReactionCounts();
             }
 
@@ -156,7 +156,7 @@ namespace SocialApp.Components
         {
             if (AppController.CurrentUser != null)
             {
-                reactionService.ValidateAdd(AppController.CurrentUser.Id, postId, ReactionType.Laugh);
+                reactionService.AddReaction(AppController.CurrentUser.Id, postId, ReactionType.Laugh);
                 LoadReactionCounts();
             }
 
@@ -166,7 +166,7 @@ namespace SocialApp.Components
         {
             if (AppController.CurrentUser != null)
             {
-                reactionService.ValidateAdd(AppController.CurrentUser.Id, postId, ReactionType.Anger);
+                reactionService.AddReaction(AppController.CurrentUser.Id, postId, ReactionType.Anger);
                 LoadReactionCounts();
             }
         }

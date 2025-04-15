@@ -33,8 +33,8 @@ namespace SocialApp.Pages
     public sealed partial class CreateGroup : Page
     {
         private AppController controller;
-        private GroupService groupService;
-        private UserService userService;
+        private IGroupService groupService;
+        private IUserService userService;
         private string image = string.Empty;
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace SocialApp.Pages
                     Image = image
                 };
 
-                groupService.ValidateAdd(newGroup.Name, newGroup.Description ?? "", newGroup.Image ?? "", newGroup.AdminId);
+                groupService.AddGroup(newGroup.Name, newGroup.Description ?? "", newGroup.Image ?? "", newGroup.AdminId);
                 Frame.Navigate(typeof(UserPage), controller);
             }
             catch (Exception ex)

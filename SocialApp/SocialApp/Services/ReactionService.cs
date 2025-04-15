@@ -8,7 +8,7 @@
 
     public class ReactionService(IReactionRepository reactionRepository) : IReactionService
     {
-        public Reaction AddReaction_byUserAndPost(long userId, long postId, ReactionType type)
+        public Reaction AddReaction(long userId, long postId, ReactionType type)
         {
             if (reactionRepository.GetReactionByUserAndPost(userId, postId) != null)
             {
@@ -21,7 +21,7 @@
             return reaction;
         }
 
-        public void DeleteReaction_byUserAndPost(long userId, long postId)
+        public void DeleteReaction(long userId, long postId)
         {
             Reaction reaction = reactionRepository.GetReactionByUserAndPost(userId, postId);
             if (reaction == null)

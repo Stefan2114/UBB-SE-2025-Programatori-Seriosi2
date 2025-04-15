@@ -9,8 +9,8 @@ namespace SocialApp.Services
         List<Comment> GetAllComments();
         Comment GetCommentById(int commentId);
         List<Comment> GetCommentsByPostId(long postId);
-        Comment ValidateAdd(string content, long userId, long postId);
-        void ValidateDelete(long commentId);
+        Comment AddComment(string content, long userId, long postId);
+        void DeleteComment(long commentId);
         void UpdateComment(long commentId, string content);
     }
 }

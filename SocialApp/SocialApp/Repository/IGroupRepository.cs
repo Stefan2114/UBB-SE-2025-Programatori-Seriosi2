@@ -9,7 +9,7 @@ namespace SocialApp.Repository
 
         List<Group> GetAllGroups();
 
-        Group GetGroupsById(long id);
+        Group GetGroupById(long id);
 
         List<Group> GetGroupsForUser(long userId);
 
@@ -17,6 +17,6 @@ namespace SocialApp.Repository
 
         void SaveGroup(Group entity);
 
-        void UpdateGroupById(long id, string name, string image, string description, long adminId);
+        void UpdateGroup(long id, string name, string image, string description, long adminId);
     }
 }

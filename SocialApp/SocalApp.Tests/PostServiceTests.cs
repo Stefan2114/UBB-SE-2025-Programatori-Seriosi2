@@ -17,7 +17,7 @@ namespace SocialApp.Tests
         /// Validates that the AddPost method returns a Post object when provided with valid arguments.
         /// </summary>
         [Test]
-        public void ValidateAddPost_WithValidArguments_ReturnsPost()
+        public void AddPost_WithValidArguments_ReturnsPost()
         {
             // Arange
             var postRepository = Substitute.For<IPostRepository>();
@@ -38,7 +38,7 @@ namespace SocialApp.Tests
             Post post = new Post { Title = title, Content = content, UserId = userId, GroupId = groupId, Visibility = postVisibility, Tag = postTag, CreatedDate = DateTime.Now };
 
             userRepository.GetById(userId).Returns(user);
-            groupRepository.GetById(groupId).Returns(group);
+            groupRepository.GetGroupById(groupId).Returns(group);
 
             // Act
             var returnedPost = postService.AddPost(title, content, userId, groupId, postVisibility, postTag);
@@ -53,7 +53,7 @@ namespace SocialApp.Tests
             Assert.That(returnedPost.Tag, Is.EqualTo(post.Tag));
 
             userRepository.Received(1).GetById(userId);
-            groupRepository.Received(1).GetById(groupId);
+            groupRepository.Received(1).GetGroupById(groupId);
             postRepository.Received(1).SavePost(Arg.Any<Post>());
         }
 
@@ -61,7 +61,7 @@ namespace SocialApp.Tests
         /// Validates that the AddPost method throws an exception when provided with an invalid title.
         /// </summary>
         [Test]
-        public void ValidateAddPost_WithInvalidTitle_ThrowsException()
+        public void AddPost_WithInvalidTitle_ThrowsException()
         {
             // Arange
             var postRepository = Substitute.For<IPostRepository>();
@@ -85,7 +85,7 @@ namespace SocialApp.Tests
         /// Validates that the AddPost method throws an exception when provided with an invalid user ID.
         /// </summary>
         [Test]
-        public void ValidateAddPost_WithInvalidUserId_ThrowsException()
+        public void AddPost_WithInvalidUserId_ThrowsException()
         {
             // Arange
             var postRepository = Substitute.For<IPostRepository>();
@@ -112,7 +112,7 @@ namespace SocialApp.Tests
         /// Validates that the AddPost method throws an exception when provided with an invalid group ID.
         /// </summary>
         [Test]
-        public void ValidateAddPost_WithInvalidGroupId_ThrowsException()
+        public void AddPost_WithInvalidGroupId_ThrowsException()
         {
             // Arange
             var postRepository = Substitute.For<IPostRepository>();
@@ -131,19 +131,19 @@ namespace SocialApp.Tests
             User user = new User { Id = userId, Username = "username", Email = "email", PasswordHash = "passwordHash", Image = "image" };
 
             userRepository.GetById(userId).Returns(user); // Simulate user found
-            groupRepository.GetById(userId).Returns((Group)null); // Simulate group not found
+            groupRepository.GetGroupById(userId).Returns((Group)null); // Simulate group not found
 
             // Act & Assert
             Assert.Throws<Exception>(() => postService.AddPost(title, content, userId, groupId, postVisibility, postTag), "Group does not exist");
             userRepository.Received(1).GetById(userId);
-            groupRepository.Received(1).GetById(groupId);
+            groupRepository.Received(1).GetGroupById(groupId);
         }
 
         /// <summary>
         /// Validates that the DeletePost method throws an exception when provided with an invalid post ID.
         /// </summary>
         [Test]
-        public void ValidateDeletePost_WithInvalidPostId_ThrowsException()
+        public void DeletePost_WithInvalidPostId_ThrowsException()
         {
             // Arange
             var postRepository = Substitute.For<IPostRepository>();
@@ -165,7 +165,7 @@ namespace SocialApp.Tests
         /// Validates that the DeletePost method successfully deletes a post when provided with a valid post ID.
         /// </summary>
         [Test]
-        public void ValidateDeletePost_WithValidPostId()
+        public void DeletePost_WithValidPostId()
         {
             // Arange
             var postRepository = Substitute.For<IPostRepository>();
@@ -192,7 +192,7 @@ namespace SocialApp.Tests
         /// Validates that the UpdatePost method throws an exception when provided with an invalid post ID.
         /// </summary>
         [Test]
-        public void ValidateUpdatePost_WithInvalidPostId_ThrowsException()
+        public void UpdatePost_WithInvalidPostId_ThrowsException()
         {
             // Arange
             var postRepository = Substitute.For<IPostRepository>();
@@ -218,7 +218,7 @@ namespace SocialApp.Tests
         /// Validates that the UpdatePost method successfully updates a post when provided with a valid post ID.
         /// </summary>
         [Test]
-        public void ValidateUpdatePost_WithValidPostId()
+        public void UpdatePost_WithValidPostId()
         {
             // Arange
             var postRepository = Substitute.For<IPostRepository>();

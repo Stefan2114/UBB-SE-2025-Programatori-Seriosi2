@@ -10,8 +10,8 @@ namespace SocialApp.Services
 
         List<Reaction> GetReactionsForPost(long postId);
 
-        Reaction AddReaction_byUserAndPost(long userId, long postId, ReactionType type);
+        Reaction AddReaction(long userId, long postId, ReactionType type);
 
-        void DeleteReaction_byUserAndPost(long userId, long postId);
+        void DeleteReaction(long userId, long postId);
     }
 }

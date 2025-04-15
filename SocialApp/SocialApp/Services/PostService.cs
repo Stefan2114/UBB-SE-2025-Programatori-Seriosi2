@@ -50,7 +50,7 @@ namespace SocialApp.Services
             }
             if (groupId != 0)
             {
-                if (this.groupRepository.GetById(groupId) == null)
+                if (this.groupRepository.GetGroupById(groupId) == null)
                 {
                     throw new Exception("Group does not exist");
                 }

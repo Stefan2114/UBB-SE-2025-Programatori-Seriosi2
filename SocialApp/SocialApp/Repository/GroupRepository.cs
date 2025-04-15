@@ -19,11 +19,11 @@ namespace SocialApp.Repository
     /// <summary>
     /// Repository class for managing Group entities.
     /// </summary>
-    public partial class GroupRepository : IGroupRepository, IDisposable
+    public partial class GroupRepository : IGroupRepository
     {
         private string loginString = "Data Source=vm;" +
-    "Initial Catalog=team_babes;" +
-    "Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
+     "Initial Catalog=team_babes;" +
+     "Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
 
         private SqlConnection connection;
 
@@ -165,7 +165,7 @@ namespace SocialApp.Repository
         /// </summary>
         /// <param name="id">The ID of the group to retrieve.</param>
         /// <returns>The group with the specified ID, or null if not found.</returns>
-        public Group GetGroupsById(long id)
+        public Group GetGroupById(long id)
         {
             this.connection.Open();
             Group? group = null;
@@ -239,7 +239,7 @@ namespace SocialApp.Repository
         /// <param name="adminId">
         /// the ID of the admin.
         /// </param>
-        public void UpdateGroupById(long id, string name, string image, string description, long adminId)
+        public void UpdateGroup(long id, string name, string image, string description, long adminId)
         {
             this.connection.Open();
 
