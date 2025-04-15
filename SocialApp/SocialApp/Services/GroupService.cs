@@ -61,7 +61,7 @@
             }
 
 
-            this.groupRepository.UpdateGroup(id, name, image, desccription, adminId);
+            this.groupRepository.UpdateGroup(id, name, image, description, adminId);
         }
 
         public List<Group> GetAll()

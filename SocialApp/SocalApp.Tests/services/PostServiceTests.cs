@@ -1,4 +1,3 @@
-using SocialApp;
 using NSubstitute;
 using SocialApp.Repository;
 using SocialApp.Services;

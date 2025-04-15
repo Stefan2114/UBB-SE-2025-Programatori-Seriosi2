@@ -5,7 +5,7 @@ VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialApp", "SocialApp\SocialApp.csproj", "{7F5F44EF-21FD-46BA-88E0-CB192FECFFB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocalApp.Tests", "SocalApp.Tests\SocalApp.Tests.csproj", "{6854B6FB-15CC-4DA1-A469-C63568424C06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialApp.Tests", "SocalApp.Tests\SocialApp.Tests.csproj", "{6854B6FB-15CC-4DA1-A469-C63568424C06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
