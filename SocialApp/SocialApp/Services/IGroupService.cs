@@ -9,8 +9,8 @@ namespace SocialApp.Services
 
         List<Group> GetGroupsForUser(long userId);
         List<User> GetUsersFromGroup(long groupId);
-        Group addGroup(string name, string desc, string image, long adminId);
-        void deleteGroup(long groupId);
+        Group AddGroup(string name, string desc, string image, long adminId);
+        void DeleteGroup(long groupId);
         void UpdateUser(long id, string name, string desc, string image, long adminId);
     }
 }
