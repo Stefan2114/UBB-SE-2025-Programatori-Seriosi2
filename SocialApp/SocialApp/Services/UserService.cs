@@ -111,7 +111,7 @@ namespace SocialApp.Services
         /// </summary>
         /// <param name="id">The user ID.</param>
         /// <returns>A list of followers.</returns>
-        public List<User> GetUserFollowersFromId(long id)
+        public List<User> GetUserFollowers(long id)
         {
             return this.userRepository.GetUserFollowers(id);
         }
@@ -132,7 +132,7 @@ namespace SocialApp.Services
         /// <param name="userId">The user ID.</param>
         /// <param name="whoToFollowId">The ID of the user to follow.</param>
         /// <exception cref="Exception">Thrown when the user or the user to follow does not exist.</exception>
-        public void FollowUserById(long userId, long whoToFollowId
+        public void FollowUserById(long userId, long whoToFollowId)
         {
             if (this.userRepository.GetById(userId) == null)
             {
@@ -153,7 +153,7 @@ namespace SocialApp.Services
         /// <param name="userId">The user ID.</param>
         /// <param name="whoToUnfollowId">The ID of the user to unfollow.</param>
         /// <exception cref="Exception">Thrown when the user or the user to unfollow does not exist.</exception>
-        public void UnfollowUserById(long userId, long whoToUnfollowId
+        public void UnfollowUserById(long userId, long whoToUnfollowId)
         {
             if (this.userRepository.GetById(userId) == null)
             {

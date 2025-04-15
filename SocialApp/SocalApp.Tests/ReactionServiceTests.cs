@@ -42,7 +42,7 @@ namespace SocialApp.Tests
             this.reactionRepository.GetReactionByUserAndPost(userId, postId).Returns(existingReaction);
 
             // Act
-            var result = this.reactionService.AddReaction_byUserAndPost(userId, postId, newType);
+            var result = this.reactionService.AddReaction(userId, postId, newType);
 
             // Assert
             this.reactionRepository.Received(1).UpdateByUserAndPost(userId, postId, newType);
@@ -64,7 +64,7 @@ namespace SocialApp.Tests
             this.reactionRepository.GetReactionByUserAndPost(userId, postId).Returns(null as Reaction);
 
             // Act
-            var result = this.reactionService.AddReaction_byUserAndPost(userId, postId, type);
+            var result = this.reactionService.AddReaction(userId, postId, type);
 
             // Assert
             this.reactionRepository.Received(1).Save(Arg.Is<Reaction>(r =>
@@ -88,7 +88,7 @@ namespace SocialApp.Tests
             this.reactionRepository.GetReactionByUserAndPost(userId, postId).Returns(null as Reaction);
 
             // Act & Assert
-            var ex = Assert.Throws<Exception>(() => this.reactionService.DeleteReaction_byUserAndPost(userId, postId));
+            var ex = Assert.Throws<Exception>(() => this.reactionService.DeleteReaction(userId, postId));
             Assert.That(ex.Message, Is.EqualTo("Reaction does not exist"));
         }
 
@@ -105,7 +105,7 @@ namespace SocialApp.Tests
             this.reactionRepository.GetReactionByUserAndPost(userId, postId).Returns(new Reaction { UserId = userId, PostId = postId });
 
             // Act
-            this.reactionService.DeleteReaction_byUserAndPost(userId, postId);
+            this.reactionService.DeleteReaction(userId, postId);
 
             // Assert
             this.reactionRepository.Received(1).DeleteByUserAndPost(userId, postId);

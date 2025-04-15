@@ -11,7 +11,7 @@ namespace SocialApp.Services
 
         User GetById(long id);
 
-        List<User> GetUserFollowersFromId(long id);
+        List<User> GetUserFollowers(long id);
 
         List<User> GetUserFollowing(long id);
 

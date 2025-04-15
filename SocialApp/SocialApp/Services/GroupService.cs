@@ -17,7 +17,7 @@
             this.userRepository = userRepository;
         }
 
-        public Group ValidateAdd(string name, string desc, string image, long adminId)
+        public Group AddGroup(string name, string desc, string image, long adminId)
         {
             if (name == null || name.Length == 0)
             {
@@ -31,21 +31,21 @@
 
             Group group = new Group() { Name = name, AdminId = adminId, Image = image, Description = desc };
 
-            GroupRepository.SaveGroup(group);
+            groupRepository.SaveGroup(group);
             return group;
         }
 
-        public void ValidateDelete(long groupId)
+        public void DeleteGroup(long groupId)
         {
-            if (this.groupRepository.GetById(groupId) == null)
+            if (this.groupRepository.GetGroupById(groupId) == null)
                 throw new Exception("Group does not exist");
 
-            this.groupRepository.DeleteById(groupId);
+            this.groupRepository.DeleteGroupById(groupId);
         }
 
-        public void UpdateUser(long id, string name, string desc, string image, long adminId)
+        public void UpdateGroup(long id, string name, string desc, string image, long adminId)
         {
-            if (this.groupRepository.GetById(id) == null)
+            if (this.groupRepository.GetGroupById(id) == null)
             {
                 throw new Exception("Group does not exist");
             }
@@ -60,17 +60,17 @@
                 throw new Exception("Group name cannot be empty");
             }
 
-            this.groupRepository.UpdateById(id, name, image, desc, adminId);
+            this.groupRepository.UpdateGroup(id, name, image, desc, adminId);
         }
 
         public List<Group> GetAll()
         {
-            return this.groupRepository.GetAll();
+            return this.groupRepository.GetAllGroups();
         }
 
-        public Group GetById(long id)
+        public Group GetGroupById(long id)
         {
-            return this.groupRepository.GetById(id);
+            return this.groupRepository.GetGroupById(id);
         }
 
         public List<User> GetUsersFromGroup(long groupId)
@@ -78,7 +78,7 @@
             return this.groupRepository.GetUsersFromGroup(groupId);
         }
 
-        public List<Group> GetGroupsForUser(long userId)
+        public List<Group> GetGroups(long userId)
         {
             return this.groupRepository.GetGroupsForUser(userId);
         }

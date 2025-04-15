@@ -5,12 +5,12 @@ namespace SocialApp.Services
 {
     public interface IGroupService
     {
-      
-   
-        List<Group> GetGroupsForUser(long userId);
+        Group GetGroupById(long id);
+
+        List<Group> GetGroups(long userId);
         List<User> GetUsersFromGroup(long groupId);
-        Group ValidateAdd(string name, string desc, string image, long adminId);
-        void ValidateDelete(long groupId);
-        void UpdateUser(long id, string name, string desc, string image, long adminId);
+        Group AddGroup(string name, string desc, string image, long adminId);
+        void DeleteGroup(long groupId);
+        void UpdateGroup(long id, string name, string desc, string image, long adminId);
     }
 }

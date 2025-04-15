@@ -14,11 +14,11 @@ namespace SocialApp.Pages
     public sealed partial class UserPage : Page
     {
         private AppController controller;
-        private UserRepository userRepository;
-        private UserService userService;
-        private PostRepository postRepository;
-        private PostService postService;
-        private GroupRepository groupRepository;
+        private IUserRepository userRepository;
+        private IUserService userService;
+        private IPostRepository postRepository;
+        private IPostService postService;
+        private IGroupRepository groupRepository;
         private User displayedUser; // User to display (may differ from CurrentUser)
 
         public UserPage()
@@ -96,12 +96,12 @@ namespace SocialApp.Pages
             {
                 if (this.IsFollowed())
                 {
-                    this.userService.UnfollowUser(this.controller.CurrentUser.Id, this.displayedUser.Id);
+                    this.userService.UnfollowUserById(this.controller.CurrentUser.Id, this.displayedUser.Id);
                     this.FollowLogOutButton.Content = "Follow";
                 }
                 else
                 {
-                    this.userService.FollowUser(this.controller.CurrentUser.Id, this.displayedUser.Id);
+                    this.userService.FollowUserById(this.controller.CurrentUser.Id, this.displayedUser.Id);
                     this.FollowLogOutButton.Content = "Unfollow";
 
                 }

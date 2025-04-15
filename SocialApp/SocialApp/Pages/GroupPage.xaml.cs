@@ -15,12 +15,12 @@ namespace SocialApp.Pages
     {
         private const Visibility collapsed = Visibility.Collapsed;
         private const Visibility visible = Visibility.Visible;
-        private UserRepository userRepository;
-        private UserService userService;
-        private PostRepository postRepository;
-        private PostService postService;
-        private GroupRepository groupRepository;
-        private GroupService groupService;
+        private IUserRepository userRepository;
+        private IUserService userService;
+        private IPostRepository postRepository;
+        private IPostService postService;
+        private IGroupRepository groupRepository;
+        private IGroupService groupService;
         private long GroupId;
         private Entities.Group group;
 
@@ -48,7 +48,7 @@ namespace SocialApp.Pages
             groupService = new GroupService(groupRepository, userRepository);
             postRepository = new PostRepository();
             postService = new PostService(postRepository, userRepository, groupRepository);
-            group = groupService.GetById(GroupId);
+            group = groupService.GetGroupById(GroupId);
 
             SetVisibilities();
             SetContent();
@@ -64,7 +64,7 @@ namespace SocialApp.Pages
         {
             var controller = App.Services.GetService<AppController>();
             if (controller.CurrentUser == null) return false;
-            return groupRepository.GetGroupsById(GroupId).AdminId == controller.CurrentUser.Id;
+            return groupRepository.GetGroupById(GroupId).AdminId == controller.CurrentUser.Id;
         }
 
         private async void SetContent()

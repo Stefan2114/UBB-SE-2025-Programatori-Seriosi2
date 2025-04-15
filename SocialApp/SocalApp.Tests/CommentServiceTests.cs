@@ -18,7 +18,7 @@ namespace SocialApp.Tests
         /// Validates that the ValidateAdd method successfully adds a comment when provided with valid arguments.
         /// </summary>
         [Test]
-        public void ValidateAddComment_WithValidArguments_ReturnsComment()
+        public void AddComment_WithValidArguments_ReturnsComment()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
@@ -35,7 +35,7 @@ namespace SocialApp.Tests
             var post = new Post { Id = postId, Title = "TestPost", Content = "TestContent", CreatedDate = DateTime.Now, UserId = userId, GroupId = 1, Visibility = Enums.PostVisibility.Public, Tag = Enums.PostTag.Misc };
 
             userRepository.GetById(userId).Returns(user);
-            postRepository.GetById(postId).Returns(post);
+            postRepository.GetPostById(postId).Returns(post);
 
             // Act
             var result = commentService.AddComment(content, userId, postId);
@@ -45,14 +45,14 @@ namespace SocialApp.Tests
             Assert.That(result.Content, Is.EqualTo(content));
             Assert.That(result.UserId, Is.EqualTo(userId));
             Assert.That(result.PostId, Is.EqualTo(postId));
-            commentRepository.Received(1).Save(Arg.Any<Comment>());
+            commentRepository.Received(1).SaveComment(Arg.Any<Comment>());
         }
 
         /// <summary>
         /// Validates that the ValidateAdd method throws an exception when the content is empty.
         /// </summary>
         [Test]
-        public void ValidateAddComment_WithInvalidContent_ThrowsException()
+        public void AddComment_WithInvalidContent_ThrowsException()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
@@ -74,7 +74,7 @@ namespace SocialApp.Tests
         /// Validates that the ValidateAdd method throws an exception when the user does not exist.
         /// </summary>
         [Test]
-        public void ValidateAddComment_WithInvalidUser_ThrowsException()
+        public void AddComment_WithInvalidUser_ThrowsException()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
@@ -99,7 +99,7 @@ namespace SocialApp.Tests
         /// Validates that the ValidateAdd method throws an exception when the post does not exist.
         /// </summary>
         [Test]
-        public void ValidateAddComment_WithInvalidPost_ThrowsException()
+        public void AddComment_WithInvalidPost_ThrowsException()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
@@ -116,19 +116,19 @@ namespace SocialApp.Tests
 
 
             userRepository.GetById(userId).Returns(user);
-            postRepository.GetById(invalidPostId).Returns((Post)null);
+            postRepository.GetPostById(invalidPostId).Returns((Post)null);
 
             // Act & Assert
             var ex = Assert.Throws<InvalidOperationException>(() => commentService.AddComment(content, userId, invalidPostId));
             Assert.That(ex.Message, Is.EqualTo($"Post with ID {invalidPostId} does not exist."));
-            postRepository.Received(1).GetById(invalidPostId);
+            postRepository.Received(1).GetPostById(invalidPostId);
         }
 
         /// <summary>
         /// Validates that the ValidateDelete method successfully deletes a comment when provided with a valid comment ID.
         /// </summary>
         [Test]
-        public void ValidateDeleteComment_WithValidCommentId()
+        public void DeleteComment_WithValidCommentId()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
@@ -140,20 +140,20 @@ namespace SocialApp.Tests
             long commentId = 1;
             var comment = new Comment { Id = commentId, Content = "Test Content", CreatedDate = DateTime.Now, UserId = 1, PostId = 2 };
 
-            commentRepository.GetById(commentId).Returns(comment);
+            commentRepository.GetCommentById(commentId).Returns(comment);
 
             // Act
             commentService.DeleteComment(commentId);
 
             // Assert
-            commentRepository.Received(1).DeleteById(commentId);
+            commentRepository.Received(1).DeleteCommentById(commentId);
         }
 
         /// <summary>
         /// Validates that the ValidateDelete method throws an exception when the comment does not exist.
         /// </summary>
         [Test]
-        public void ValidateDeleteComment_WithInvalidCommentId_ThrowsException()
+        public void DeleteComment_WithInvalidCommentId_ThrowsException()
         {
             // Arrange
             var commentRepository = Substitute.For<ICommentRepository>();
@@ -164,19 +164,18 @@ namespace SocialApp.Tests
 
             long invalidCommentId = 999;
 
-            commentRepository.GetById(invalidCommentId).Returns((Comment)null);
+            commentRepository.GetCommentById(invalidCommentId).Returns((Comment)null);
 
             // Act & Assert
             var ex = Assert.Throws<InvalidOperationException>(() => commentService.DeleteComment(invalidCommentId));
             Assert.That(ex.Message, Is.EqualTo($"Comment with ID {invalidCommentId} does not exist."));
-            commentRepository.Received(1).GetById(invalidCommentId);
+            commentRepository.Received(1).GetCommentById(invalidCommentId);
         }
-    }
-}
+ 
         /// Validates that the UpdateComment method functions correctly when provided with valid arguments.
         /// </summary>
         [Test]
-        public void ValidateUpdateComment_WithValidArguments()
+        public void UpdateComment_WithValidArguments()
         {
             // Arange
             var commentsRepository = Substitute.For<ICommentRepository>();
@@ -192,21 +191,21 @@ namespace SocialApp.Tests
 
             Comment testComment = new Comment { Id = commentId, UserId=userId, PostId = postId, Content = content, CreatedDate = DateTime.Now };
 
-            commentsRepository.GetById(commentId).Returns(testComment);
+            commentsRepository.GetCommentById(commentId).Returns(testComment);
 
             // Act
             commentService.UpdateComment(commentId, content);
 
             // Assert
-            commentsRepository.Received(1).GetById(commentId);
-            commentsRepository.Received(1).UpdateById(commentId, content);
+            commentsRepository.Received(1).GetCommentById(commentId);
+            commentsRepository.Received(1).UpdateCommentContentById(commentId, content);
         }
 
         /// <summary>
         /// Validates that the UpdateComment function throws an exception when provided with an invalid comment Id.
         /// </summary>
         [Test]
-        public void ValidateUpdateComment_WithInvalidCommentId_ThrowsException()
+        public void UpdateComment_WithInvalidCommentId_ThrowsException()
         {
             // Arange
             var commentsRepository = Substitute.For<ICommentRepository>();
@@ -218,18 +217,18 @@ namespace SocialApp.Tests
             long commentId = 1;
             string? content = "Test Content";
 
-            commentsRepository.GetById(commentId).Returns((Comment)null);
+            commentsRepository.GetCommentById(commentId).Returns((Comment)null);
 
             // Act & Assert
             Assert.Throws<Exception>(() => commentService.UpdateComment(commentId,content), "Comment does not exist");
-            commentsRepository.Received(1).GetById(commentId);
+            commentsRepository.Received(1).GetCommentById(commentId);
         }
 
         /// <summary>
         /// Validates that the UpdateComment function throws an exception when the provided content is empty.
         /// </summary>
         [Test]
-        public void ValidateUpdateComment_WithInvalidContent_ThrowsException()
+        public void UpdateComment_WithInvalidContent_ThrowsException()
         {
             // Arange
             var commentsRepository = Substitute.For<ICommentRepository>();
@@ -246,11 +245,11 @@ namespace SocialApp.Tests
 
             Comment testComment = new Comment { Id = commentId, UserId = userId, PostId = postId, Content = content, CreatedDate = DateTime.Now };
 
-            commentsRepository.GetById(commentId).Returns(testComment);
+            commentsRepository.GetCommentById(commentId).Returns(testComment);
 
             // Act & Assert
             Assert.Throws<Exception>(() => commentService.UpdateComment(commentId, emptycontent), "Comment content cannot be empty");
-            commentsRepository.Received(1).GetById(commentId);
+            commentsRepository.Received(1).GetCommentById(commentId);
         }
     }
 }

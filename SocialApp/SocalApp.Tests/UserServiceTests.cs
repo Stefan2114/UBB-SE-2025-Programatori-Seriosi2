@@ -47,7 +47,7 @@
         /// Validates that the AddUser method throws an exception when provided with an empty username.
         /// </summary>
         [Test]
-        public void ValidateAddUser_WithEmptyUsername_ThrowsException()
+        public void AddUser_WithEmptyUsername_ThrowsException()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -65,7 +65,7 @@
         /// Validates that the AddUser method throws an exception when provided with an empty email.
         /// </summary>
         [Test]
-        public void ValidateAddUser_WithEmptyEmail_ThrowsException()
+        public void AddUser_WithEmptyEmail_ThrowsException()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -83,7 +83,7 @@
         /// Validates that the AddUser method throws an exception when provided with an empty password.
         /// </summary>
         [Test]
-        public void ValidateAddUser_WithEmptyPassword_ThrowsException()
+        public void AddUser_WithEmptyPassword_ThrowsException()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -101,7 +101,7 @@
         /// Validates that the DeleteUser method successfully deletes a user when provided with a valid ID.
         /// </summary>
         [Test]
-        public void ValidateDeleteUser_WithValidId_DeletesUser()
+        public void DeleteUser_WithValidId_DeletesUser()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -123,7 +123,7 @@
         /// Validates that the DeleteUser method throws an exception when provided with an invalid user ID.
         /// </summary>
         [Test]
-        public void ValidateDeleteUser_WithInvalidId_ThrowsException()
+        public void DeleteUser_WithInvalidId_ThrowsException()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -142,7 +142,7 @@
         /// Validates that the UpdateUser method successfully updates a user when provided with a valid user ID.
         /// </summary>
         [Test]
-        public void ValidateUpdateUser_WithValidId()
+        public void UpdateUser_WithValidId()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -178,7 +178,7 @@
         /// Validates that the UpdateUser method throws an exception when provided with an invalid user ID.
         /// </summary>
         [Test]
-        public void ValidateUpdateUser_WithInvalidID_ThrowsException()
+        public void UpdateUser_WithInvalidID_ThrowsException()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -199,7 +199,7 @@
         }
       
       [Test]
-        public void TestFollowUser_ValidUsers_Success()
+        public void FollowUser_ValidUsers_Success()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -218,7 +218,7 @@
       
       
       [Test]
-        public void TestFollowUser_FollowerDoesNotExist_ThrowsException()
+        public void FollowUser_FollowerDoesNotExist_ThrowsException()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -237,7 +237,7 @@
       
       
       [Test]
-        public void TestFollowUser_FollowedDoesNotExist_ThrowsException()
+        public void FollowUser_FollowedDoesNotExist_ThrowsException()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -255,7 +255,7 @@
         }
 
         [Test]
-        public void TestUnfollowUser_ValidUsers_Success()
+        public void UnfollowUser_ValidUsers_Success()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -274,7 +274,7 @@
       
       
         [Test]
-        public void TestUnfollowUser_FollowerDoesNotExist_ThrowsException()
+        public void UnfollowUser_FollowerDoesNotExist_ThrowsException()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -292,7 +292,7 @@
         }
 
         [Test]
-        public void TestUnfollowUser_FollowedDoesNotExist_ThrowsException()
+        public void UnfollowUser_FollowedDoesNotExist_ThrowsException()
         {
             // Arrange
             var userRepository = Substitute.For<IUserRepository>();
@@ -308,5 +308,6 @@
             Assert.That(ex.Message, Is.EqualTo("User to unfollow does not exist"));
             userRepository.DidNotReceive().Unfollow(Arg.Any<long>(), Arg.Any<long>());
         }
+
     }
 }

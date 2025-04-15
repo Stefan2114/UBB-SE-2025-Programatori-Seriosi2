@@ -15,15 +15,15 @@ namespace SocialApp.Components
 {
     public sealed partial class GroupsDrawer : UserControl
     {
-        private GroupService _groupService;
-        private Frame _navigationFrame; // Frame for navigation
+        private GroupService groupService;
+        private Frame navigationFrame; // Frame for navigation
         private AppController controller;
 
         // Public property to set the Frame from the parent page
         public Frame NavigationFrame
         {
-            get => _navigationFrame;
-            set => _navigationFrame = value;
+            get => navigationFrame;
+            set => navigationFrame = value;
         }
 
         public GroupsDrawer()
@@ -32,7 +32,7 @@ namespace SocialApp.Components
             var groupRepository = new GroupRepository();
             var userRepository = new UserRepository();
             controller = App.Services.GetService<AppController>();
-            _groupService = new GroupService(groupRepository, userRepository);
+            groupService = new GroupService(groupRepository, userRepository);
             CreateGroupButton.Click += CreateGroup_Click; // Handle click event
             LoadGroups();
         }
@@ -50,7 +50,7 @@ namespace SocialApp.Components
             //{
             //    userId = controller.CurrentUser.Id;
             //}
-            var groups = _groupService.GetGroupsForUser(controller.CurrentUser.Id);
+            var groups = groupService.GetGroups(controller.CurrentUser.Id);
 
             foreach (var group in groups)
             {
@@ -102,12 +102,12 @@ namespace SocialApp.Components
 
         private void GroupButton_Click(object sender, RoutedEventArgs e)
         {
-            _navigationFrame.Navigate(typeof(GroupPage), (long)((Button)sender).Tag);
+            navigationFrame.Navigate(typeof(GroupPage), (long)((Button)sender).Tag);
         }
 
         private void CreateGroup_Click(object sender, RoutedEventArgs e)
         {
-            _navigationFrame.Navigate(typeof(CreateGroup));
+            navigationFrame.Navigate(typeof(CreateGroup));
         }
     }
 

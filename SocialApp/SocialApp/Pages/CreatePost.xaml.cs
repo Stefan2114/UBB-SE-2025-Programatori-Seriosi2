@@ -34,8 +34,8 @@ namespace SocialApp.Pages
     public sealed partial class CreatePost : Page
     {
         private AppController controller;
-        private PostService postService;
-        private GroupService groupService;
+        private IPostService postService;
+        private IGroupService groupService;
         private List<Entities.Group> userGroups = new List<Entities.Group>();
         private string image = string.Empty;
 
@@ -83,7 +83,7 @@ namespace SocialApp.Pages
                 throw new InvalidOperationException("CurrentUser is not set in the AppController.");
             }
 
-            this.userGroups = this.groupService.GetGroupsForUser(this.controller.CurrentUser.Id);
+            this.userGroups = this.groupService.GetGroups(this.controller.CurrentUser.Id);
             this.GroupsListBox.ItemsSource = this.userGroups;
         }
 
